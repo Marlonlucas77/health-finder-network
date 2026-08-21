@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as VagasRouteImport } from './routes/vagas'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
@@ -30,6 +31,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HospitaisRoute = HospitaisRouteImport.update({
@@ -61,6 +67,7 @@ const MedicosIdRoute = MedicosIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
   '/painel': typeof AuthenticatedPainelRoute
@@ -81,6 +89,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
@@ -92,6 +101,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
     | '/painel'
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
     | '/painel'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
     | '/_authenticated/painel'
@@ -122,6 +134,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   HospitaisRoute: typeof HospitaisRoute
   VagasRoute: typeof VagasRoute
   MedicosIdRoute: typeof MedicosIdRoute
@@ -149,6 +162,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hospitais': {
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   HospitaisRoute: HospitaisRoute,
   VagasRoute: VagasRoute,
   MedicosIdRoute: MedicosIdRoute,
