@@ -555,7 +555,7 @@ function Painel() {
                 </p>
               ) : (
                 (myShifts ?? []).map((s) => {
-                  const apps = (s.shift_applications ?? []) as ShiftApp[];
+                  const apps = s.shift_applications ?? [];
                   const approved = apps.filter((a) => a.status === "aprovada").length;
                   return (
                     <article key={s.id} className="card-surface p-5">
