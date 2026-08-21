@@ -58,6 +58,10 @@ function ShiftsPage() {
   const { user, isEscalista, isMedico } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState("");
+  const [fSpecialty, setFSpecialty] = useState("all");
+  const [fState, setFState] = useState("all");
+  const [fStatus, setFStatus] = useState("abertas");
   const [form, setForm] = useState({
     hospital_id: "",
     specialty_id: "",
