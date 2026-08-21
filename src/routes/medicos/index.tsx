@@ -162,17 +162,72 @@ function DoctorsPage() {
         }
         if (specialty !== "all" && !d.specIds.includes(specialty)) return false;
         if (state !== "all" && d.state !== state) return false;
+        if (city !== "all" && d.city !== city) return false;
         if (onlyAvailable && !d.available) return false;
+        if (onlyUrgent && !d.accepts_urgent) return false;
+        if (onlyRqe && !d.has_rqe) return false;
+        if (Number(minExp) > 0 && d.years_experience < Number(minExp)) return false;
+        if (Number(maxRate) > 0 && (d.hourly_rate == null || Number(d.hourly_rate) > Number(maxRate)))
+          return false;
         if (Number(minRating) > 0 && d.rating.avg < Number(minRating)) return false;
         return true;
       })
-      .sort((a, b) => b.rating.avg - a.rating.avg || b.years_experience - a.years_experience);
-  }, [data, specialties, term, specialty, state, onlyAvailable, minRating]);
+      .sort((a, b) => {
+        if (sort === "experiencia") return b.years_experience - a.years_experience;
+        if (sort === "avaliacoes") return b.rating.count - a.rating.count;
+        if (sort === "preco_asc")
+          return (a.hourly_rate ?? Infinity) - (b.hourly_rate ?? Infinity);
+        if (sort === "nome") return a.name.localeCompare(b.name, "pt-BR");
+        return b.rating.avg - a.rating.avg || b.years_experience - a.years_experience;
+      });
+  }, [
+    data,
+    specialties,
+    term,
+    specialty,
+    state,
+    city,
+    onlyAvailable,
+    onlyUrgent,
+    onlyRqe,
+    minExp,
+    maxRate,
+    minRating,
+    sort,
+  ]);
 
   const states = useMemo(
     () => Array.from(new Set((data?.profiles ?? []).map((p) => p.state).filter(Boolean))).sort(),
     [data],
   );
+
+  const cities = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (data?.profiles ?? [])
+            .filter((p) => state === "all" || p.state === state)
+            .map((p) => p.city)
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [data, state],
+  );
+
+  function clearFilters() {
+    setTerm("");
+    setSpecialty("all");
+    setState("all");
+    setCity("all");
+    setOnlyAvailable(false);
+    setOnlyUrgent(false);
+    setOnlyRqe(false);
+    setMinExp("0");
+    setMaxRate("0");
+    setMinRating("0");
+    setSort("rating");
+  }
+
 
   return (
     <div className="min-h-screen bg-background">
