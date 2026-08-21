@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
 import { Route as MedicosIdRouteImport } from './routes/medicos/$id'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HospitaisRoute = HospitaisRouteImport.update({
+  id: '/hospitais',
+  path: '/hospitais',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MedicosIndexRoute = MedicosIndexRouteImport.update({
@@ -38,12 +44,14 @@ const MedicosIdRoute = MedicosIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hospitais': typeof HospitaisRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hospitais': typeof HospitaisRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos': typeof MedicosIndexRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/hospitais': typeof HospitaisRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/medicos/$id' | '/medicos/'
+  fullPaths: '/' | '/auth' | '/hospitais' | '/medicos/$id' | '/medicos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/medicos/$id' | '/medicos'
-  id: '__root__' | '/' | '/auth' | '/medicos/$id' | '/medicos/'
+  to: '/' | '/auth' | '/hospitais' | '/medicos/$id' | '/medicos'
+  id: '__root__' | '/' | '/auth' | '/hospitais' | '/medicos/$id' | '/medicos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  HospitaisRoute: typeof HospitaisRoute
   MedicosIdRoute: typeof MedicosIdRoute
   MedicosIndexRoute: typeof MedicosIndexRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hospitais': {
+      id: '/hospitais'
+      path: '/hospitais'
+      fullPath: '/hospitais'
+      preLoaderRoute: typeof HospitaisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/medicos/': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  HospitaisRoute: HospitaisRoute,
   MedicosIdRoute: MedicosIdRoute,
   MedicosIndexRoute: MedicosIndexRoute,
 }
