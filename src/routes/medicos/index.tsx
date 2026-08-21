@@ -319,12 +319,14 @@ function DoctorsPage() {
                       </span>
                     </div>
                   </Link>
+                  </div>
                 ))}
               </div>
             )}
           </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }
