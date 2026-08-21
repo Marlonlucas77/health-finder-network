@@ -10,15 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as VagasRouteImport } from './routes/vagas'
+import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
 import { Route as MedicosIdRouteImport } from './routes/medicos/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -36,6 +42,11 @@ const VagasRoute = VagasRouteImport.update({
   path: '/vagas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const MedicosIndexRoute = MedicosIndexRouteImport.update({
   id: '/medicos/',
   path: '/medicos/',
@@ -52,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
@@ -60,36 +72,55 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos': typeof MedicosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/hospitais' | '/vagas' | '/medicos/$id' | '/medicos/'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/hospitais' | '/vagas' | '/medicos/$id' | '/medicos'
-  id:
-    | '__root__'
     | '/'
     | '/auth'
     | '/hospitais'
     | '/vagas'
+    | '/painel'
+    | '/medicos/$id'
+    | '/medicos/'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/hospitais'
+    | '/vagas'
+    | '/painel'
+    | '/medicos/$id'
+    | '/medicos'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/hospitais'
+    | '/vagas'
+    | '/_authenticated/painel'
     | '/medicos/$id'
     | '/medicos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   HospitaisRoute: typeof HospitaisRoute
   VagasRoute: typeof VagasRoute
@@ -104,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -127,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VagasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/painel': {
+      id: '/_authenticated/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/medicos/': {
       id: '/medicos/'
       path: '/medicos'
@@ -144,8 +189,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   HospitaisRoute: HospitaisRoute,
   VagasRoute: VagasRoute,
