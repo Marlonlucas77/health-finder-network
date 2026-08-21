@@ -248,6 +248,7 @@ function Painel() {
             {isMedico && <TabsTrigger value="medico">Dados médicos</TabsTrigger>}
             {isEscalista && <TabsTrigger value="escalista">Escalista</TabsTrigger>}
             <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>
+            {isEscalista && <TabsTrigger value="minhas-vagas">Minhas vagas</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="perfil" className="card-surface mt-6 space-y-4 p-6">
