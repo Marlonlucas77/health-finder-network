@@ -118,7 +118,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {"\u2063"}
+        {children}
         <Scripts />
       </body>
     </html>
