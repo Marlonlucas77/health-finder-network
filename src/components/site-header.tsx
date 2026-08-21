@@ -60,7 +60,7 @@ export function SiteHeader() {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/auth" })}>
+              <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/auth", search: { mode: "login" as const } })}>
                 Entrar
               </Button>
               <Button size="sm" onClick={() => navigate({ to: "/auth", search: { mode: "signup" } })}>
@@ -89,7 +89,7 @@ export function SiteHeader() {
                   </Button>
                 </>
               ) : (
-                <Button onClick={() => navigate({ to: "/auth" })}>Entrar / Cadastrar</Button>
+                <Button onClick={() => navigate({ to: "/auth", search: { mode: "login" as const } })}>Entrar / Cadastrar</Button>
               )}
             </div>
           </SheetContent>

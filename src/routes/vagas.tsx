@@ -271,7 +271,7 @@ function ShiftsPage() {
           <div className="card-surface mt-8 p-8 text-center">
             <h2 className="text-lg font-semibold">Entre para ver as vagas</h2>
             <Button asChild className="mt-5">
-              <Link to="/auth">Entrar ou criar conta</Link>
+              <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
             </Button>
           </div>
         ) : (data?.shifts ?? []).length === 0 ? (

@@ -152,7 +152,7 @@ function DoctorsPage() {
               Os dados dos médicos ficam visíveis apenas para usuários autenticados.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/auth">Entrar ou criar conta</Link>
+              <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
             </Button>
           </div>
         ) : (

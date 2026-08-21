@@ -106,7 +106,7 @@ function DoctorDetail() {
         <main className="mx-auto max-w-3xl px-4 py-20 text-center">
           <h1 className="text-2xl font-semibold">Entre para ver este perfil</h1>
           <Button asChild className="mt-6">
-            <Link to="/auth">Entrar</Link>
+            <Link to="/auth" search={{ mode: "login" }}>Entrar</Link>
           </Button>
         </main>
       </div>
