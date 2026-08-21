@@ -372,8 +372,11 @@ function ShiftsPage() {
               );
             })}
           </div>
+            )}
+          </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }
