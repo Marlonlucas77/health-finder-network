@@ -93,6 +93,36 @@ function ShiftsPage() {
     },
   });
 
+  const ufs = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (data?.shifts ?? [])
+            .map((s) => (s.hospitals as { state?: string } | null)?.state)
+            .filter((v): v is string => !!v),
+        ),
+      ).sort(),
+    [data],
+  );
+
+  const visibleShifts = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return (data?.shifts ?? []).filter((s) => {
+      const h = s.hospitals as { name?: string; city?: string; state?: string } | null;
+      const sp = s.specialties as { name?: string } | null;
+      if (term) {
+        const t = term.toLowerCase();
+        const hit = [h?.name, h?.city, sp?.name].some((v) => (v ?? "").toLowerCase().includes(t));
+        if (!hit) return false;
+      }
+      if (fSpecialty !== "all" && s.specialty_id !== fSpecialty) return false;
+      if (fState !== "all" && h?.state !== fState) return false;
+      if (fStatus === "abertas" && s.status !== "aberta") return false;
+      if (fStatus === "futuras" && String(s.shift_date) < today) return false;
+      return true;
+    });
+  }, [data, term, fSpecialty, fState, fStatus]);
+
   async function createShift() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
