@@ -274,11 +274,64 @@ function ShiftsPage() {
               <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
             </Button>
           </div>
-        ) : (data?.shifts ?? []).length === 0 ? (
-          <p className="mt-10 text-center text-muted-foreground">Nenhuma vaga publicada ainda.</p>
         ) : (
+          <>
+            <div className="card-surface mt-8 grid gap-4 p-5 md:grid-cols-4">
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Hospital, cidade ou especialidade"
+                  value={term}
+                  maxLength={80}
+                  onChange={(e) => setTerm(e.target.value)}
+                />
+              </div>
+              <Select value={fSpecialty} onValueChange={setFSpecialty}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Especialidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as especialidades</SelectItem>
+                  {(specialties ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={fState} onValueChange={setFState}>
+                <SelectTrigger>
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os estados</SelectItem>
+                  {ufs.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={fStatus} onValueChange={setFStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="abertas">Somente abertas</SelectItem>
+                  <SelectItem value="futuras">A partir de hoje</SelectItem>
+                  <SelectItem value="all">Todas as vagas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {visibleShifts.length === 0 ? (
+              <p className="mt-10 text-center text-muted-foreground">
+                Nenhuma vaga encontrada com esses filtros.
+              </p>
+            ) : (
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {(data?.shifts ?? []).map((s) => {
+            {visibleShifts.map((s) => {
               const apps = (data?.apps ?? []).filter((a) => a.shift_id === s.id);
               const applied = apps.some((a) => a.doctor_id === user.id);
               return (
