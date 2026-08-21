@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { CalendarClock, MapPin, Plus, Users } from "lucide-react";
+import { CalendarClock, MapPin, Plus, Search, Users } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,10 @@ function ShiftsPage() {
   const { user, isEscalista, isMedico } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState("");
+  const [fSpecialty, setFSpecialty] = useState("all");
+  const [fState, setFState] = useState("all");
+  const [fStatus, setFStatus] = useState("abertas");
   const [form, setForm] = useState({
     hospital_id: "",
     specialty_id: "",
@@ -91,6 +96,36 @@ function ShiftsPage() {
       return { shifts: shifts.data ?? [], apps: apps.data ?? [] };
     },
   });
+
+  const ufs = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (data?.shifts ?? [])
+            .map((s) => (s.hospitals as { state?: string } | null)?.state)
+            .filter((v): v is string => !!v),
+        ),
+      ).sort(),
+    [data],
+  );
+
+  const visibleShifts = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return (data?.shifts ?? []).filter((s) => {
+      const h = s.hospitals as { name?: string; city?: string; state?: string } | null;
+      const sp = s.specialties as { name?: string } | null;
+      if (term) {
+        const t = term.toLowerCase();
+        const hit = [h?.name, h?.city, sp?.name].some((v) => (v ?? "").toLowerCase().includes(t));
+        if (!hit) return false;
+      }
+      if (fSpecialty !== "all" && s.specialty_id !== fSpecialty) return false;
+      if (fState !== "all" && h?.state !== fState) return false;
+      if (fStatus === "abertas" && s.status !== "aberta") return false;
+      if (fStatus === "futuras" && String(s.shift_date) < today) return false;
+      return true;
+    });
+  }, [data, term, fSpecialty, fState, fStatus]);
 
   async function createShift() {
     const parsed = schema.safeParse(form);
@@ -274,11 +309,64 @@ function ShiftsPage() {
               <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
             </Button>
           </div>
-        ) : (data?.shifts ?? []).length === 0 ? (
-          <p className="mt-10 text-center text-muted-foreground">Nenhuma vaga publicada ainda.</p>
         ) : (
+          <>
+            <div className="card-surface mt-8 grid gap-4 p-5 md:grid-cols-4">
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Hospital, cidade ou especialidade"
+                  value={term}
+                  maxLength={80}
+                  onChange={(e) => setTerm(e.target.value)}
+                />
+              </div>
+              <Select value={fSpecialty} onValueChange={setFSpecialty}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Especialidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as especialidades</SelectItem>
+                  {(specialties ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={fState} onValueChange={setFState}>
+                <SelectTrigger>
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os estados</SelectItem>
+                  {ufs.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={fStatus} onValueChange={setFStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Situação" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="abertas">Somente abertas</SelectItem>
+                  <SelectItem value="futuras">A partir de hoje</SelectItem>
+                  <SelectItem value="all">Todas as vagas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {visibleShifts.length === 0 ? (
+              <p className="mt-10 text-center text-muted-foreground">
+                Nenhuma vaga encontrada com esses filtros.
+              </p>
+            ) : (
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {(data?.shifts ?? []).map((s) => {
+            {visibleShifts.map((s) => {
               const apps = (data?.apps ?? []).filter((a) => a.shift_id === s.id);
               const applied = apps.some((a) => a.doctor_id === user.id);
               return (
@@ -319,8 +407,11 @@ function ShiftsPage() {
               );
             })}
           </div>
+            )}
+          </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

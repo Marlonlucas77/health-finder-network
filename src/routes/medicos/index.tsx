@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { MapPin, Search, BadgeCheck, Clock } from "lucide-react";
+import { MapPin, Search, BadgeCheck, Clock, Heart } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Stars } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,7 +50,8 @@ type DoctorRow = {
 };
 
 function DoctorsPage() {
-  const { user } = useAuth();
+  const { user, isEscalista } = useAuth();
+  const qc = useQueryClient();
   const [term, setTerm] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [state, setState] = useState("all");
@@ -81,6 +84,35 @@ function DoctorsPage() {
       };
     },
   });
+
+  const { data: favorites } = useQuery({
+    queryKey: ["favorites", user?.id],
+    enabled: !!user && isEscalista,
+    queryFn: async () =>
+      (await supabase.from("favorites").select("id, doctor_id")).data ?? [],
+  });
+
+  async function toggleFavorite(doctorId: string) {
+    const existing = (favorites ?? []).find((f) => f.doctor_id === doctorId);
+    if (existing) {
+      const { error } = await supabase.from("favorites").delete().eq("id", existing.id);
+      if (error) {
+        toast.error("Não foi possível remover");
+        return;
+      }
+      toast.success("Removido dos favoritos");
+    } else {
+      const { error } = await supabase
+        .from("favorites")
+        .insert({ scheduler_id: user!.id, doctor_id: doctorId });
+      if (error) {
+        toast.error("Não foi possível favoritar");
+        return;
+      }
+      toast.success("Adicionado aos favoritos");
+    }
+    void qc.invalidateQueries({ queryKey: ["favorites"] });
+  }
 
   const list = useMemo(() => {
     if (!data) return [];
@@ -225,8 +257,25 @@ function DoctorsPage() {
             ) : (
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {list.map((d) => (
+                  <div key={d.user_id} className="relative">
+                  {isEscalista && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-3 top-3 z-10"
+                      aria-label="Favoritar médico"
+                      onClick={() => void toggleFavorite(d.user_id)}
+                    >
+                      <Heart
+                        className={
+                          (favorites ?? []).some((f) => f.doctor_id === d.user_id)
+                            ? "size-4 fill-primary text-primary"
+                            : "size-4"
+                        }
+                      />
+                    </Button>
+                  )}
                   <Link
-                    key={d.user_id}
                     to="/medicos/$id"
                     params={{ id: d.user_id }}
                     className="card-surface block p-5 transition-shadow hover:shadow-lift"
@@ -240,7 +289,7 @@ function DoctorsPage() {
                           {d.state ? ` · ${d.state}` : ""}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className={isEscalista ? "mr-10 text-right" : "text-right"}>
                         <Stars value={d.rating.avg} />
                         <p className="mt-1 text-xs text-muted-foreground">
                           {d.rating.count > 0
@@ -276,12 +325,14 @@ function DoctorsPage() {
                       </span>
                     </div>
                   </Link>
+                  </div>
                 ))}
               </div>
             )}
           </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

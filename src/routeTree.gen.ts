@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as VagasRouteImport } from './routes/vagas'
+import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
 import { Route as MedicosIdRouteImport } from './routes/medicos/$id'
@@ -32,6 +34,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HospitaisRoute = HospitaisRouteImport.update({
   id: '/hospitais',
   path: '/hospitais',
@@ -41,6 +48,11 @@ const VagasRoute = VagasRouteImport.update({
   id: '/vagas',
   path: '/vagas',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
@@ -61,8 +73,10 @@ const MedicosIdRoute = MedicosIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/favoritos': typeof AuthenticatedFavoritosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
@@ -70,8 +84,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/favoritos': typeof AuthenticatedFavoritosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos': typeof MedicosIndexRoute
@@ -81,8 +97,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/_authenticated/favoritos': typeof AuthenticatedFavoritosRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
@@ -92,8 +110,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
+    | '/favoritos'
     | '/painel'
     | '/medicos/$id'
     | '/medicos/'
@@ -101,8 +121,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
+    | '/favoritos'
     | '/painel'
     | '/medicos/$id'
     | '/medicos'
@@ -111,8 +133,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/como-funciona'
     | '/hospitais'
     | '/vagas'
+    | '/_authenticated/favoritos'
     | '/_authenticated/painel'
     | '/medicos/$id'
     | '/medicos/'
@@ -122,6 +146,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   HospitaisRoute: typeof HospitaisRoute
   VagasRoute: typeof VagasRoute
   MedicosIdRoute: typeof MedicosIdRoute
@@ -151,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hospitais': {
       id: '/hospitais'
       path: '/hospitais'
@@ -164,6 +196,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/vagas'
       preLoaderRoute: typeof VagasRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/favoritos': {
+      id: '/_authenticated/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof AuthenticatedFavoritosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
@@ -190,10 +229,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedFavoritosRoute: typeof AuthenticatedFavoritosRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedFavoritosRoute: AuthenticatedFavoritosRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
 }
 
@@ -204,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   HospitaisRoute: HospitaisRoute,
   VagasRoute: VagasRoute,
   MedicosIdRoute: MedicosIdRoute,

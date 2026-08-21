@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -137,6 +138,40 @@ function Painel() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["painel", uid] });
 
+  const { data: myShifts } = useQuery({
+    queryKey: ["my-shifts", uid],
+    enabled: isEscalista,
+    queryFn: async () =>
+      (
+        await supabase
+          .from("shifts")
+          .select(
+            "id, shift_date, start_time, end_time, slots, status, hospitals(name), specialties(name), shift_applications(id, doctor_id, status)",
+          )
+          .eq("created_by", uid)
+          .order("shift_date", { ascending: true })
+      ).data ?? [],
+  });
+
+  const { data: doctorNamesData } = useQuery({
+    queryKey: ["doctor-names"],
+    enabled: isEscalista,
+    queryFn: async () => (await supabase.from("profiles").select("id, full_name")).data ?? [],
+  });
+  const doctorNames = new Map(
+    (doctorNamesData ?? []).map((p) => [p.id, p.full_name ?? "Médico(a)"]),
+  );
+
+  async function setAppStatus(id: string, status: "aprovada" | "recusada") {
+    const { error } = await supabase.from("shift_applications").update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Não foi possível atualizar a candidatura");
+      return;
+    }
+    toast.success(status === "aprovada" ? "Candidatura aprovada" : "Candidatura recusada");
+    void queryClient.invalidateQueries({ queryKey: ["my-shifts", uid] });
+  }
+
   async function saveProfile() {
     const parsed = profileSchema.safeParse(profile);
     if (!parsed.success) {
@@ -248,6 +283,7 @@ function Painel() {
             {isMedico && <TabsTrigger value="medico">Dados médicos</TabsTrigger>}
             {isEscalista && <TabsTrigger value="escalista">Escalista</TabsTrigger>}
             <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>
+            {isEscalista && <TabsTrigger value="minhas-vagas">Minhas vagas</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="perfil" className="card-surface mt-6 space-y-4 p-6">
@@ -507,8 +543,92 @@ function Painel() {
               </div>
             )}
           </TabsContent>
+
+          {isEscalista && (
+            <TabsContent value="minhas-vagas" className="mt-6 space-y-4">
+              {(myShifts ?? []).length === 0 ? (
+                <p className="text-muted-foreground">
+                  Você ainda não publicou vagas.{" "}
+                  <Link to="/vagas" className="text-primary underline">
+                    Publicar uma vaga
+                  </Link>
+                </p>
+              ) : (
+                (myShifts ?? []).map((s) => {
+                  const apps = s.shift_applications ?? [];
+                  const approved = apps.filter((a) => a.status === "aprovada").length;
+                  return (
+                    <article key={s.id} className="card-surface p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h2 className="font-display text-lg font-semibold">
+                            {s.specialties?.name}
+                          </h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {s.hospitals?.name} ·{" "}
+                            {new Date(`${s.shift_date}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+                            {String(s.start_time).slice(0, 5)}–{String(s.end_time).slice(0, 5)}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">
+                          {approved}/{s.slots} vaga(s) preenchida(s)
+                        </Badge>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {apps.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            Nenhuma candidatura recebida.
+                          </p>
+                        ) : (
+                          apps.map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"
+                            >
+                              <div>
+                                <Link
+                                  to="/medicos/$id"
+                                  params={{ id: a.doctor_id }}
+                                  className="text-sm font-medium hover:text-primary"
+                                >
+                                  {doctorNames.get(a.doctor_id) ?? "Médico(a)"}
+                                </Link>
+                                <p className="text-xs capitalize text-muted-foreground">
+                                  {a.status}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={a.status === "aprovada"}
+                                  onClick={() => void setAppStatus(a.id, "aprovada")}
+                                >
+                                  Aprovar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={a.status === "recusada"}
+                                  onClick={() => void setAppStatus(a.id, "recusada")}
+                                >
+                                  Recusar
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </article>
+                  );
+                })
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
+      <SiteFooter />
     </div>
   );
 }

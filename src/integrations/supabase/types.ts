@@ -99,6 +99,30 @@ export type Database = {
           },
         ]
       }
+      favorites: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          note: string | null
+          scheduler_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          note?: string | null
+          scheduler_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          note?: string | null
+          scheduler_id?: string
+        }
+        Relationships: []
+      }
       hospitals: {
         Row: {
           address: string | null
