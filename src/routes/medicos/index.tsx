@@ -50,7 +50,8 @@ type DoctorRow = {
 };
 
 function DoctorsPage() {
-  const { user } = useAuth();
+  const { user, isEscalista } = useAuth();
+  const qc = useQueryClient();
   const [term, setTerm] = useState("");
   const [specialty, setSpecialty] = useState("all");
   const [state, setState] = useState("all");
