@@ -137,6 +137,40 @@ function Painel() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["painel", uid] });
 
+  const { data: myShifts } = useQuery({
+    queryKey: ["my-shifts", uid],
+    enabled: isEscalista,
+    queryFn: async () =>
+      (
+        await supabase
+          .from("shifts")
+          .select(
+            "id, shift_date, start_time, end_time, slots, status, hospitals(name), specialties(name), shift_applications(id, doctor_id, status)",
+          )
+          .eq("created_by", uid)
+          .order("shift_date", { ascending: true })
+      ).data ?? [],
+  });
+
+  const { data: doctorNamesData } = useQuery({
+    queryKey: ["doctor-names"],
+    enabled: isEscalista,
+    queryFn: async () => (await supabase.from("profiles").select("id, full_name")).data ?? [],
+  });
+  const doctorNames = new Map(
+    (doctorNamesData ?? []).map((p) => [p.id, p.full_name ?? "Médico(a)"]),
+  );
+
+  async function setAppStatus(id: string, status: "aprovada" | "recusada") {
+    const { error } = await supabase.from("shift_applications").update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Não foi possível atualizar a candidatura");
+      return;
+    }
+    toast.success(status === "aprovada" ? "Candidatura aprovada" : "Candidatura recusada");
+    void queryClient.invalidateQueries({ queryKey: ["my-shifts", uid] });
+  }
+
   async function saveProfile() {
     const parsed = profileSchema.safeParse(profile);
     if (!parsed.success) {
