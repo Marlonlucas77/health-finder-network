@@ -96,13 +96,19 @@ function DoctorsPage() {
     const existing = (favorites ?? []).find((f) => f.doctor_id === doctorId);
     if (existing) {
       const { error } = await supabase.from("favorites").delete().eq("id", existing.id);
-      if (error) return toast.error("Não foi possível remover");
+      if (error) {
+        toast.error("Não foi possível remover");
+        return;
+      }
       toast.success("Removido dos favoritos");
     } else {
       const { error } = await supabase
         .from("favorites")
         .insert({ scheduler_id: user!.id, doctor_id: doctorId });
-      if (error) return toast.error("Não foi possível favoritar");
+      if (error) {
+        toast.error("Não foi possível favoritar");
+        return;
+      }
       toast.success("Adicionado aos favoritos");
     }
     void qc.invalidateQueries({ queryKey: ["favorites"] });
