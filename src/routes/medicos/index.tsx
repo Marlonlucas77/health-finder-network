@@ -85,6 +85,29 @@ function DoctorsPage() {
     },
   });
 
+  const { data: favorites } = useQuery({
+    queryKey: ["favorites", user?.id],
+    enabled: !!user && isEscalista,
+    queryFn: async () =>
+      (await supabase.from("favorites").select("id, doctor_id")).data ?? [],
+  });
+
+  async function toggleFavorite(doctorId: string) {
+    const existing = (favorites ?? []).find((f) => f.doctor_id === doctorId);
+    if (existing) {
+      const { error } = await supabase.from("favorites").delete().eq("id", existing.id);
+      if (error) return toast.error("Não foi possível remover");
+      toast.success("Removido dos favoritos");
+    } else {
+      const { error } = await supabase
+        .from("favorites")
+        .insert({ scheduler_id: user!.id, doctor_id: doctorId });
+      if (error) return toast.error("Não foi possível favoritar");
+      toast.success("Adicionado aos favoritos");
+    }
+    void qc.invalidateQueries({ queryKey: ["favorites"] });
+  }
+
   const list = useMemo(() => {
     if (!data) return [];
     const profileById = new Map(data.profiles.map((p) => [p.id, p]));
