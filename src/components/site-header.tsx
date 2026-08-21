@@ -8,10 +8,11 @@ const links = [
   { to: "/medicos", label: "Médicos" },
   { to: "/hospitais", label: "Hospitais" },
   { to: "/vagas", label: "Vagas de plantão" },
-];
+  { to: "/como-funciona", label: "Como funciona" },
+] as const;
 
 export function SiteHeader() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isEscalista } = useAuth();
   const navigate = useNavigate();
 
   const nav = (
@@ -26,6 +27,15 @@ export function SiteHeader() {
           {l.label}
         </Link>
       ))}
+      {isEscalista && (
+        <Link
+          to="/favoritos"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          activeProps={{ className: "text-primary" }}
+        >
+          Favoritos
+        </Link>
+      )}
     </>
   );
 
