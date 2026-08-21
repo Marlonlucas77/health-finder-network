@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { MapPin, Search, BadgeCheck, Clock } from "lucide-react";
+import { MapPin, Search, BadgeCheck, Clock, Heart } from "lucide-react";
+import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Stars } from "@/components/stars";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
