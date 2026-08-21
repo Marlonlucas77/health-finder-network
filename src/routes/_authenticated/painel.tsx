@@ -507,8 +507,92 @@ function Painel() {
               </div>
             )}
           </TabsContent>
+
+          {isEscalista && (
+            <TabsContent value="minhas-vagas" className="mt-6 space-y-4">
+              {(myShifts ?? []).length === 0 ? (
+                <p className="text-muted-foreground">
+                  Você ainda não publicou vagas.{" "}
+                  <Link to="/vagas" className="text-primary underline">
+                    Publicar uma vaga
+                  </Link>
+                </p>
+              ) : (
+                (myShifts ?? []).map((s) => {
+                  const apps = (s.shift_applications ?? []) as ShiftApp[];
+                  const approved = apps.filter((a) => a.status === "aprovada").length;
+                  return (
+                    <article key={s.id} className="card-surface p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h2 className="font-display text-lg font-semibold">
+                            {s.specialties?.name}
+                          </h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {s.hospitals?.name} ·{" "}
+                            {new Date(`${s.shift_date}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+                            {String(s.start_time).slice(0, 5)}–{String(s.end_time).slice(0, 5)}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">
+                          {approved}/{s.slots} vaga(s) preenchida(s)
+                        </Badge>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {apps.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            Nenhuma candidatura recebida.
+                          </p>
+                        ) : (
+                          apps.map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3"
+                            >
+                              <div>
+                                <Link
+                                  to="/medicos/$id"
+                                  params={{ id: a.doctor_id }}
+                                  className="text-sm font-medium hover:text-primary"
+                                >
+                                  {doctorNames.get(a.doctor_id) ?? "Médico(a)"}
+                                </Link>
+                                <p className="text-xs capitalize text-muted-foreground">
+                                  {a.status}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={a.status === "aprovada"}
+                                  onClick={() => void setAppStatus(a.id, "aprovada")}
+                                >
+                                  Aprovar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={a.status === "recusada"}
+                                  onClick={() => void setAppStatus(a.id, "recusada")}
+                                >
+                                  Recusar
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </article>
+                  );
+                })
+              )}
+            </TabsContent>
+          )}
         </Tabs>
       </main>
+      <SiteFooter />
     </div>
   );
 }
