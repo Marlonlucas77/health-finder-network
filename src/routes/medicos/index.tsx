@@ -53,9 +53,15 @@ function DoctorsPage() {
   const { user, isEscalista } = useAuth();
   const qc = useQueryClient();
   const [term, setTerm] = useState("");
+  const [city, setCity] = useState("all");
   const [specialty, setSpecialty] = useState("all");
   const [state, setState] = useState("all");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
+  const [onlyUrgent, setOnlyUrgent] = useState(false);
+  const [onlyRqe, setOnlyRqe] = useState(false);
+  const [minExp, setMinExp] = useState("0");
+  const [maxRate, setMaxRate] = useState("0");
+  const [sort, setSort] = useState("rating");
   const [minRating, setMinRating] = useState("0");
 
   const { data: specialties } = useQuery({
