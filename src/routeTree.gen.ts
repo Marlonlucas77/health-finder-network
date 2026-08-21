@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
+import { Route as MedicosIdRouteImport } from './routes/medicos/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,34 +29,43 @@ const MedicosIndexRoute = MedicosIndexRouteImport.update({
   path: '/medicos/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MedicosIdRoute = MedicosIdRouteImport.update({
+  id: '/medicos/$id',
+  path: '/medicos/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/medicos/$id': typeof MedicosIdRoute
   '/medicos': typeof MedicosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/medicos/'
+  fullPaths: '/' | '/auth' | '/medicos/$id' | '/medicos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/medicos'
-  id: '__root__' | '/' | '/auth' | '/medicos/'
+  to: '/' | '/auth' | '/medicos/$id' | '/medicos'
+  id: '__root__' | '/' | '/auth' | '/medicos/$id' | '/medicos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  MedicosIdRoute: typeof MedicosIdRoute
   MedicosIndexRoute: typeof MedicosIndexRoute
 }
 
@@ -82,12 +92,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MedicosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/medicos/$id': {
+      id: '/medicos/$id'
+      path: '/medicos/$id'
+      fullPath: '/medicos/$id'
+      preLoaderRoute: typeof MedicosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  MedicosIdRoute: MedicosIdRoute,
   MedicosIndexRoute: MedicosIndexRoute,
 }
 export const routeTree = rootRouteImport
