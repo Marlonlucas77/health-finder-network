@@ -274,7 +274,13 @@ function DoctorsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={state} onValueChange={setState}>
+              <Select
+                value={state}
+                onValueChange={(v) => {
+                  setState(v);
+                  setCity("all");
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="UF" />
                 </SelectTrigger>
@@ -287,10 +293,43 @@ function DoctorsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex items-center gap-3 md:col-span-2">
-                <Switch id="avail" checked={onlyAvailable} onCheckedChange={setOnlyAvailable} />
-                <Label htmlFor="avail">Somente disponíveis</Label>
-              </div>
+              <Select value={city} onValueChange={setCity}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Cidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as cidades</SelectItem>
+                  {cities.map((c) => (
+                    <SelectItem key={c} value={c!}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={minExp} onValueChange={setMinExp}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Experiência" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["0", "2", "5", "10", "15", "20"].map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v === "0" ? "Qualquer experiência" : `${v}+ anos`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={maxRate} onValueChange={setMaxRate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Valor/hora" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["0", "100", "150", "200", "300", "500"].map((v) => (
+                    <SelectItem key={v} value={v}>
+                      {v === "0" ? "Qualquer valor/hora" : `Até R$ ${v}/h`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={minRating} onValueChange={setMinRating}>
                 <SelectTrigger>
                   <SelectValue placeholder="Nota mínima" />
@@ -303,7 +342,43 @@ function DoctorsPage() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={sort} onValueChange={setSort}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rating">Melhor avaliados</SelectItem>
+                  <SelectItem value="experiencia">Mais experientes</SelectItem>
+                  <SelectItem value="avaliacoes">Mais avaliações</SelectItem>
+                  <SelectItem value="preco_asc">Menor valor/hora</SelectItem>
+                  <SelectItem value="nome">Nome (A-Z)</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap items-center gap-5 md:col-span-3">
+                <div className="flex items-center gap-2">
+                  <Switch id="avail" checked={onlyAvailable} onCheckedChange={setOnlyAvailable} />
+                  <Label htmlFor="avail">Disponíveis</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="urg" checked={onlyUrgent} onCheckedChange={setOnlyUrgent} />
+                  <Label htmlFor="urg">Aceita urgência</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="rqe" checked={onlyRqe} onCheckedChange={setOnlyRqe} />
+                  <Label htmlFor="rqe">Com RQE</Label>
+                </div>
+              </div>
+              <Button variant="outline" onClick={clearFilters}>
+                Limpar filtros
+              </Button>
             </div>
+
+            {!isLoading && (
+              <p className="mt-4 text-sm text-muted-foreground">
+                {list.length} médico(s) encontrado(s)
+              </p>
+            )}
+
 
             {isLoading ? (
               <div className="mt-8 grid gap-4 md:grid-cols-2">
