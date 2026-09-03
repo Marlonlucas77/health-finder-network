@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
@@ -29,7 +29,8 @@ export const Route = createFileRoute("/_authenticated/painel")({
       { title: "Meu painel | EscalaMed" },
       {
         name: "description",
-        content: "Gerencie seu perfil de médico ou escalista, especialidades, hospitais e candidaturas.",
+        content:
+          "Gerencie seu perfil de médico ou escalista, especialidades, hospitais e candidaturas.",
       },
       { property: "og:title", content: "Meu painel | EscalaMed" },
       { property: "og:description", content: "Perfil, especialidades, hospitais e candidaturas." },
@@ -58,7 +59,13 @@ function Painel() {
   const queryClient = useQueryClient();
   const uid = user!.id;
 
-  const [profile, setProfile] = useState({ full_name: "", phone: "", city: "", state: "", bio: "" });
+  const [profile, setProfile] = useState({
+    full_name: "",
+    phone: "",
+    city: "",
+    state: "",
+    bio: "",
+  });
   const [doctor, setDoctor] = useState({
     crm: "",
     crm_state: "",
@@ -81,8 +88,10 @@ function Painel() {
         supabase.from("doctor_hospitals").select("hospital_id").eq("doctor_id", uid),
         supabase
           .from("shift_applications")
-          .select("id, status, shift_id, doctor_id, shifts(shift_date, hospitals(name), specialties(name), created_by)")
-          .or(`doctor_id.eq.${uid}`),
+          .select(
+            "id, status, shift_id, doctor_id, shifts(shift_date, hospitals(name), specialties(name), created_by)",
+          )
+          .eq("doctor_id", uid),
       ]);
       return {
         profile: p.data,
@@ -97,7 +106,8 @@ function Painel() {
 
   const { data: specialties } = useQuery({
     queryKey: ["specialties"],
-    queryFn: async () => (await supabase.from("specialties").select("id, name").order("name")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("specialties").select("id, name").order("name")).data ?? [],
   });
   const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
@@ -153,13 +163,27 @@ function Painel() {
       ).data ?? [],
   });
 
+  // Only the doctors who actually applied to one of this scheduler's shifts —
+  // avoids pulling every user's profile from the database.
+  const applicantIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (myShifts ?? []).flatMap((s) => (s.shift_applications ?? []).map((a) => a.doctor_id)),
+        ),
+      ),
+    [myShifts],
+  );
+
   const { data: doctorNamesData } = useQuery({
-    queryKey: ["doctor-names"],
-    enabled: isEscalista,
-    queryFn: async () => (await supabase.from("profiles").select("id, full_name")).data ?? [],
+    queryKey: ["doctor-names", applicantIds],
+    enabled: isEscalista && applicantIds.length > 0,
+    queryFn: async () =>
+      (await supabase.from("profiles").select("id, full_name").in("id", applicantIds)).data ?? [],
   });
-  const doctorNames = new Map(
-    (doctorNamesData ?? []).map((p) => [p.id, p.full_name ?? "Médico(a)"]),
+  const doctorNames = useMemo(
+    () => new Map((doctorNamesData ?? []).map((p) => [p.id, p.full_name ?? "Médico(a)"])),
+    [doctorNamesData],
   );
 
   async function setAppStatus(id: string, status: "aprovada" | "recusada") {
@@ -255,7 +279,11 @@ function Painel() {
   async function toggleHospital(hospitalId: string, on: boolean) {
     const q = on
       ? supabase.from("doctor_hospitals").insert({ doctor_id: uid, hospital_id: hospitalId })
-      : supabase.from("doctor_hospitals").delete().eq("doctor_id", uid).eq("hospital_id", hospitalId);
+      : supabase
+          .from("doctor_hospitals")
+          .delete()
+          .eq("doctor_id", uid)
+          .eq("hospital_id", hospitalId);
     const { error } = await q;
     if (error) toast.error("Erro ao atualizar hospitais");
     else refresh();
@@ -368,7 +396,9 @@ function Painel() {
                       type="number"
                       min={0}
                       value={doctor.years_experience}
-                      onChange={(e) => setDoctor((d) => ({ ...d, years_experience: e.target.value }))}
+                      onChange={(e) =>
+                        setDoctor((d) => ({ ...d, years_experience: e.target.value }))
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -525,7 +555,10 @@ function Painel() {
             ) : (
               <div className="space-y-3">
                 {(data?.apps ?? []).map((a) => (
-                  <article key={a.id} className="card-surface flex items-center justify-between p-4">
+                  <article
+                    key={a.id}
+                    className="card-surface flex items-center justify-between p-4"
+                  >
                     <div>
                       <p className="font-medium">{a.shifts?.specialties?.name}</p>
                       <p className="text-sm text-muted-foreground">

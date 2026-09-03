@@ -95,7 +95,8 @@ function DoctorsPage() {
     queryKey: ["favorites", user?.id],
     enabled: !!user && isEscalista,
     queryFn: async () =>
-      (await supabase.from("favorites").select("id, doctor_id")).data ?? [],
+      (await supabase.from("favorites").select("id, doctor_id").eq("scheduler_id", user!.id))
+        .data ?? [],
   });
 
   async function toggleFavorite(doctorId: string) {
@@ -167,7 +168,10 @@ function DoctorsPage() {
         if (onlyUrgent && !d.accepts_urgent) return false;
         if (onlyRqe && !d.has_rqe) return false;
         if (Number(minExp) > 0 && d.years_experience < Number(minExp)) return false;
-        if (Number(maxRate) > 0 && (d.hourly_rate == null || Number(d.hourly_rate) > Number(maxRate)))
+        if (
+          Number(maxRate) > 0 &&
+          (d.hourly_rate == null || Number(d.hourly_rate) > Number(maxRate))
+        )
           return false;
         if (Number(minRating) > 0 && d.rating.avg < Number(minRating)) return false;
         return true;
@@ -175,8 +179,7 @@ function DoctorsPage() {
       .sort((a, b) => {
         if (sort === "experiencia") return b.years_experience - a.years_experience;
         if (sort === "avaliacoes") return b.rating.count - a.rating.count;
-        if (sort === "preco_asc")
-          return (a.hourly_rate ?? Infinity) - (b.hourly_rate ?? Infinity);
+        if (sort === "preco_asc") return (a.hourly_rate ?? Infinity) - (b.hourly_rate ?? Infinity);
         if (sort === "nome") return a.name.localeCompare(b.name, "pt-BR");
         return b.rating.avg - a.rating.avg || b.years_experience - a.years_experience;
       });
@@ -228,7 +231,6 @@ function DoctorsPage() {
     setSort("rating");
   }
 
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -245,7 +247,9 @@ function DoctorsPage() {
               Os dados dos médicos ficam visíveis apenas para usuários autenticados.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
+              <Link to="/auth" search={{ mode: "login" }}>
+                Entrar ou criar conta
+              </Link>
             </Button>
           </div>
         ) : (
@@ -379,7 +383,6 @@ function DoctorsPage() {
               </p>
             )}
 
-
             {isLoading ? (
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {[0, 1, 2, 3].map((i) => (
@@ -394,73 +397,75 @@ function DoctorsPage() {
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {list.map((d) => (
                   <div key={d.user_id} className="relative">
-                  {isEscalista && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-3 top-3 z-10"
-                      aria-label="Favoritar médico"
-                      onClick={() => void toggleFavorite(d.user_id)}
+                    {isEscalista && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-3 top-3 z-10"
+                        aria-label="Favoritar médico"
+                        onClick={() => void toggleFavorite(d.user_id)}
+                      >
+                        <Heart
+                          className={
+                            (favorites ?? []).some((f) => f.doctor_id === d.user_id)
+                              ? "size-4 fill-primary text-primary"
+                              : "size-4"
+                          }
+                        />
+                      </Button>
+                    )}
+                    <Link
+                      to="/medicos/$id"
+                      params={{ id: d.user_id }}
+                      className="card-surface block p-5 transition-shadow hover:shadow-lift"
                     >
-                      <Heart
-                        className={
-                          (favorites ?? []).some((f) => f.doctor_id === d.user_id)
-                            ? "size-4 fill-primary text-primary"
-                            : "size-4"
-                        }
-                      />
-                    </Button>
-                  )}
-                  <Link
-                    to="/medicos/$id"
-                    params={{ id: d.user_id }}
-                    className="card-surface block p-5 transition-shadow hover:shadow-lift"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="font-display text-lg font-semibold">{d.name}</h2>
-                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="size-3.5" />
-                          {d.city || "Cidade não informada"}
-                          {d.state ? ` · ${d.state}` : ""}
-                        </p>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="font-display text-lg font-semibold">{d.name}</h2>
+                          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="size-3.5" />
+                            {d.city || "Cidade não informada"}
+                            {d.state ? ` · ${d.state}` : ""}
+                          </p>
+                        </div>
+                        <div className={isEscalista ? "mr-10 text-right" : "text-right"}>
+                          <Stars value={d.rating.avg} />
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {d.rating.count > 0
+                              ? `${d.rating.avg.toFixed(1)} · ${d.rating.count} avaliação(ões)`
+                              : "Sem avaliações"}
+                          </p>
+                        </div>
                       </div>
-                      <div className={isEscalista ? "mr-10 text-right" : "text-right"}>
-                        <Stars value={d.rating.avg} />
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {d.rating.count > 0
-                            ? `${d.rating.avg.toFixed(1)} · ${d.rating.count} avaliação(ões)`
-                            : "Sem avaliações"}
-                        </p>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {d.specNames.slice(0, 3).map((s) => (
+                          <Badge key={s} variant="secondary" className="rounded-full text-xs">
+                            {s}
+                          </Badge>
+                        ))}
+                        {d.specNames.length > 3 && (
+                          <Badge variant="outline" className="rounded-full text-xs">
+                            +{d.specNames.length - 3}
+                          </Badge>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {d.specNames.slice(0, 3).map((s) => (
-                        <Badge key={s} variant="secondary" className="rounded-full text-xs">
-                          {s}
-                        </Badge>
-                      ))}
-                      {d.specNames.length > 3 && (
-                        <Badge variant="outline" className="rounded-full text-xs">
-                          +{d.specNames.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <BadgeCheck className="size-3.5" /> CRM {d.crm}/{d.crm_state}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3.5" /> {d.years_experience} anos
-                      </span>
-                      {d.hourly_rate ? <span>R$ {Number(d.hourly_rate).toFixed(0)}/h</span> : null}
-                      <span className={d.available ? "text-accent-foreground" : ""}>
-                        {d.available ? "Disponível" : "Indisponível"}
-                      </span>
-                    </div>
-                  </Link>
+                      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <BadgeCheck className="size-3.5" /> CRM {d.crm}/{d.crm_state}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="size-3.5" /> {d.years_experience} anos
+                        </span>
+                        {d.hourly_rate ? (
+                          <span>R$ {Number(d.hourly_rate).toFixed(0)}/h</span>
+                        ) : null}
+                        <span className={d.available ? "text-accent-foreground" : ""}>
+                          {d.available ? "Disponível" : "Indisponível"}
+                        </span>
+                      </div>
+                    </Link>
                   </div>
                 ))}
               </div>

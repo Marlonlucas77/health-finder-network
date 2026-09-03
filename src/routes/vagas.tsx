@@ -34,10 +34,14 @@ export const Route = createFileRoute("/vagas")({
       { title: "Vagas de plantão abertas | EscalaMed" },
       {
         name: "description",
-        content: "Plantões publicados por escalistas: hospital, especialidade, data, horário e valor.",
+        content:
+          "Plantões publicados por escalistas: hospital, especialidade, data, horário e valor.",
       },
       { property: "og:title", content: "Vagas de plantão | EscalaMed" },
-      { property: "og:description", content: "Encontre e candidate-se a plantões médicos abertos." },
+      {
+        property: "og:description",
+        content: "Encontre e candidate-se a plantões médicos abertos.",
+      },
     ],
   }),
   component: ShiftsPage,
@@ -75,25 +79,39 @@ function ShiftsPage() {
 
   const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
-    queryFn: async () => (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
   });
   const { data: specialties } = useQuery({
     queryKey: ["specialties"],
-    queryFn: async () => (await supabase.from("specialties").select("id, name").order("name")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("specialties").select("id, name").order("name")).data ?? [],
   });
 
   const { data } = useQuery({
-    queryKey: ["shifts"],
+    queryKey: ["shifts", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [shifts, apps] = await Promise.all([
+      const [shifts, appCounts, myApps] = await Promise.all([
         supabase
           .from("shifts")
           .select("*, hospitals(name, city, state), specialties(name)")
           .order("shift_date", { ascending: true }),
-        supabase.from("shift_applications").select("id, shift_id, doctor_id, status"),
+        // Aggregate counts only — never expose other doctors' identities to
+        // everyone browsing this page (enforced by the shift_application_counts
+        // security-definer function, since raw table reads are RLS-restricted).
+        supabase.rpc("shift_application_counts"),
+        // The current doctor's own applications, to know which ones they applied to.
+        supabase
+          .from("shift_applications")
+          .select("id, shift_id, doctor_id, status")
+          .eq("doctor_id", user!.id),
       ]);
-      return { shifts: shifts.data ?? [], apps: apps.data ?? [] };
+      return {
+        shifts: shifts.data ?? [],
+        appCounts: appCounts.data ?? [],
+        myApps: myApps.data ?? [],
+      };
     },
   });
 
@@ -306,7 +324,9 @@ function ShiftsPage() {
           <div className="card-surface mt-8 p-8 text-center">
             <h2 className="text-lg font-semibold">Entre para ver as vagas</h2>
             <Button asChild className="mt-5">
-              <Link to="/auth" search={{ mode: "login" }}>Entrar ou criar conta</Link>
+              <Link to="/auth" search={{ mode: "login" }}>
+                Entrar ou criar conta
+              </Link>
             </Button>
           </div>
         ) : (
@@ -365,48 +385,53 @@ function ShiftsPage() {
                 Nenhuma vaga encontrada com esses filtros.
               </p>
             ) : (
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {visibleShifts.map((s) => {
-              const apps = (data?.apps ?? []).filter((a) => a.shift_id === s.id);
-              const applied = apps.some((a) => a.doctor_id === user.id);
-              return (
-                <article key={s.id} className="card-surface p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="font-display text-lg font-semibold">{s.specialties?.name}</h2>
-                      <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="size-3.5" /> {s.hospitals?.name} — {s.hospitals?.city}/
-                        {s.hospitals?.state}
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                {visibleShifts.map((s) => {
+                  const applicationCount =
+                    (data?.appCounts ?? []).find((a) => a.shift_id === s.id)?.applicant_count ?? 0;
+                  const applied = (data?.myApps ?? []).some((a) => a.shift_id === s.id);
+                  return (
+                    <article key={s.id} className="card-surface p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h2 className="font-display text-lg font-semibold">
+                            {s.specialties?.name}
+                          </h2>
+                          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                            <MapPin className="size-3.5" /> {s.hospitals?.name} —{" "}
+                            {s.hospitals?.city}/{s.hospitals?.state}
+                          </p>
+                        </div>
+                        <Badge variant={s.status === "aberta" ? "default" : "outline"}>
+                          {s.status}
+                        </Badge>
+                      </div>
+                      <p className="mt-4 flex items-center gap-2 text-sm">
+                        <CalendarClock className="size-4 text-primary" />
+                        {new Date(`${s.shift_date}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+                        {String(s.start_time).slice(0, 5)} às {String(s.end_time).slice(0, 5)}
                       </p>
-                    </div>
-                    <Badge variant={s.status === "aberta" ? "default" : "outline"}>{s.status}</Badge>
-                  </div>
-                  <p className="mt-4 flex items-center gap-2 text-sm">
-                    <CalendarClock className="size-4 text-primary" />
-                    {new Date(`${s.shift_date}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
-                    {String(s.start_time).slice(0, 5)} às {String(s.end_time).slice(0, 5)}
-                  </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    {s.payment ? <span>R$ {Number(s.payment).toFixed(2)}</span> : null}
-                    <span className="flex items-center gap-1">
-                      <Users className="size-3.5" /> {apps.length}/{s.slots} candidatura(s)
-                    </span>
-                  </div>
-                  {s.notes ? <p className="mt-3 text-sm">{s.notes}</p> : null}
-                  {isMedico && (
-                    <Button
-                      className="mt-4"
-                      variant={applied ? "outline" : "default"}
-                      disabled={applied}
-                      onClick={() => apply(s.id)}
-                    >
-                      {applied ? "Candidatura enviada" : "Candidatar-me"}
-                    </Button>
-                  )}
-                </article>
-              );
-            })}
-          </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        {s.payment ? <span>R$ {Number(s.payment).toFixed(2)}</span> : null}
+                        <span className="flex items-center gap-1">
+                          <Users className="size-3.5" /> {applicationCount}/{s.slots} candidatura(s)
+                        </span>
+                      </div>
+                      {s.notes ? <p className="mt-3 text-sm">{s.notes}</p> : null}
+                      {isMedico && (
+                        <Button
+                          className="mt-4"
+                          variant={applied ? "outline" : "default"}
+                          disabled={applied}
+                          onClick={() => apply(s.id)}
+                        >
+                          {applied ? "Candidatura enviada" : "Candidatar-me"}
+                        </Button>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
             )}
           </>
         )}

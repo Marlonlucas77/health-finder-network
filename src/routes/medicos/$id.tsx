@@ -41,7 +41,12 @@ function DoctorDetail() {
   const { id } = Route.useParams();
   const { user, isEscalista } = useAuth();
   const queryClient = useQueryClient();
-  const [scores, setScores] = useState({ rating: 5, punctuality: 5, technical: 5, relationship: 5 });
+  const [scores, setScores] = useState({
+    rating: 5,
+    punctuality: 5,
+    technical: 5,
+    relationship: 5,
+  });
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -49,14 +54,29 @@ function DoctorDetail() {
     queryKey: ["doctor", id],
     enabled: !!user,
     queryFn: async () => {
-      const [profile, doctor, specs, hospitals, reviews, reviewerProfiles] = await Promise.all([
+      const [profile, doctor, specs, hospitals, reviews] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
         supabase.from("doctor_profiles").select("*").eq("user_id", id).maybeSingle(),
-        supabase.from("doctor_specialties").select("specialty_id, specialties(name)").eq("doctor_id", id),
-        supabase.from("doctor_hospitals").select("hospital_id, hospitals(name, city, state)").eq("doctor_id", id),
-        supabase.from("reviews").select("*").eq("doctor_id", id).order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, full_name"),
+        supabase
+          .from("doctor_specialties")
+          .select("specialty_id, specialties(name)")
+          .eq("doctor_id", id),
+        supabase
+          .from("doctor_hospitals")
+          .select("hospital_id, hospitals(name, city, state)")
+          .eq("doctor_id", id),
+        supabase
+          .from("reviews")
+          .select("*")
+          .eq("doctor_id", id)
+          .order("created_at", { ascending: false }),
       ]);
+      // Only fetch names for the people who actually reviewed this doctor.
+      const reviewerIds = Array.from(new Set((reviews.data ?? []).map((r) => r.reviewer_id)));
+      const reviewerProfiles =
+        reviewerIds.length > 0
+          ? await supabase.from("profiles").select("id, full_name").in("id", reviewerIds)
+          : { data: [] };
       return {
         profile: profile.data,
         doctor: doctor.data,
@@ -106,7 +126,9 @@ function DoctorDetail() {
         <main className="mx-auto max-w-3xl px-4 py-20 text-center">
           <h1 className="text-2xl font-semibold">Entre para ver este perfil</h1>
           <Button asChild className="mt-6">
-            <Link to="/auth" search={{ mode: "login" }}>Entrar</Link>
+            <Link to="/auth" search={{ mode: "login" }}>
+              Entrar
+            </Link>
           </Button>
         </main>
       </div>
@@ -126,7 +148,9 @@ function DoctorDetail() {
             <section className="card-surface p-6 sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-semibold">{data.profile.full_name || "Médico(a)"}</h1>
+                  <h1 className="text-3xl font-semibold">
+                    {data.profile.full_name || "Médico(a)"}
+                  </h1>
                   <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="size-4" />
                     {data.profile.city || "Cidade não informada"}
@@ -143,7 +167,9 @@ function DoctorDetail() {
                 <div className="text-right">
                   <Stars value={avg} size={20} />
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {reviews.length ? `${avg.toFixed(1)} de 5 · ${reviews.length} avaliações` : "Sem avaliações"}
+                    {reviews.length
+                      ? `${avg.toFixed(1)} de 5 · ${reviews.length} avaliações`
+                      : "Sem avaliações"}
                   </p>
                   <Badge className="mt-3" variant={data.doctor.available ? "default" : "outline"}>
                     {data.doctor.available ? "Disponível para plantões" : "Indisponível"}
@@ -153,15 +179,18 @@ function DoctorDetail() {
 
               <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
                 <p className="flex items-center gap-2">
-                  <BadgeCheck className="size-4 text-primary" /> CRM {data.doctor.crm}/{data.doctor.crm_state}
+                  <BadgeCheck className="size-4 text-primary" /> CRM {data.doctor.crm}/
+                  {data.doctor.crm_state}
                   {data.doctor.has_rqe ? " · RQE" : ""}
                 </p>
                 <p className="flex items-center gap-2">
-                  <Clock className="size-4 text-primary" /> {data.doctor.years_experience} anos de experiência
+                  <Clock className="size-4 text-primary" /> {data.doctor.years_experience} anos de
+                  experiência
                 </p>
                 {data.doctor.hourly_rate ? (
                   <p className="flex items-center gap-2">
-                    <span className="text-primary">R$</span> {Number(data.doctor.hourly_rate).toFixed(2)} por hora
+                    <span className="text-primary">R$</span>{" "}
+                    {Number(data.doctor.hourly_rate).toFixed(2)} por hora
                   </p>
                 ) : null}
                 {data.profile.phone ? (
@@ -177,7 +206,9 @@ function DoctorDetail() {
               </div>
 
               {data.profile.bio ? (
-                <p className="mt-6 whitespace-pre-line text-sm text-muted-foreground">{data.profile.bio}</p>
+                <p className="mt-6 whitespace-pre-line text-sm text-muted-foreground">
+                  {data.profile.bio}
+                </p>
               ) : null}
 
               {data.hospitals.length > 0 && (
@@ -248,12 +279,14 @@ function DoctorDetail() {
                   {reviews.map((r) => (
                     <article key={r.id} className="card-surface p-5">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium">{data.names.get(r.reviewer_id) || "Escalista"}</p>
+                        <p className="font-medium">
+                          {data.names.get(r.reviewer_id) || "Escalista"}
+                        </p>
                         <Stars value={r.rating} />
                       </div>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Pontualidade {r.punctuality ?? "-"} · Técnica {r.technical ?? "-"} · Relacionamento{" "}
-                        {r.relationship ?? "-"}
+                        Pontualidade {r.punctuality ?? "-"} · Técnica {r.technical ?? "-"} ·
+                        Relacionamento {r.relationship ?? "-"}
                       </p>
                       {r.comment ? <p className="mt-3 text-sm">{r.comment}</p> : null}
                     </article>

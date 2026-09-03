@@ -19,10 +19,14 @@ export const Route = createFileRoute("/_authenticated/favoritos")({
       { title: "Médicos favoritos | EscalaMed" },
       {
         name: "description",
-        content: "Sua lista de médicos favoritos com anotações privadas para montar escalas rápido.",
+        content:
+          "Sua lista de médicos favoritos com anotações privadas para montar escalas rápido.",
       },
       { property: "og:title", content: "Médicos favoritos | EscalaMed" },
-      { property: "og:description", content: "Salve médicos de confiança e monte escalas mais rápido." },
+      {
+        property: "og:description",
+        content: "Salve médicos de confiança e monte escalas mais rápido.",
+      },
     ],
   }),
   component: FavoritesPage,
@@ -40,12 +44,16 @@ function FavoritesPage() {
       const { data: favs } = await supabase
         .from("favorites")
         .select("id, doctor_id, note, created_at")
+        .eq("scheduler_id", user!.id)
         .order("created_at", { ascending: false });
       const ids = (favs ?? []).map((f) => f.doctor_id);
       if (ids.length === 0) return { favs: favs ?? [], profiles: [], docs: [], reviews: [] };
       const [profiles, docs, reviews] = await Promise.all([
         supabase.from("profiles").select("id, full_name, city, state").in("id", ids),
-        supabase.from("doctor_profiles").select("user_id, crm, crm_state, available").in("user_id", ids),
+        supabase
+          .from("doctor_profiles")
+          .select("user_id, crm, crm_state, available")
+          .in("user_id", ids),
         supabase.from("reviews").select("doctor_id, rating").in("doctor_id", ids),
       ]);
       return {
@@ -71,7 +79,10 @@ function FavoritesPage() {
 
   const saveNote = useMutation({
     mutationFn: async ({ id, note }: { id: string; note: string }) => {
-      const { error } = await supabase.from("favorites").update({ note: note.slice(0, 500) }).eq("id", id);
+      const { error } = await supabase
+        .from("favorites")
+        .update({ note: note.slice(0, 500) })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -81,22 +92,24 @@ function FavoritesPage() {
     onError: () => toast.error("Não foi possível salvar a anotação"),
   });
 
-  const items = (data?.favs ?? []).map((f) => {
-    const p = data?.profiles.find((x) => x.id === f.doctor_id);
-    const d = data?.docs.find((x) => x.user_id === f.doctor_id);
-    const rs = (data?.reviews ?? []).filter((r) => r.doctor_id === f.doctor_id);
-    const avg = rs.length ? rs.reduce((a, r) => a + r.rating, 0) / rs.length : 0;
-    return {
-      ...f,
-      name: p?.full_name || "Médico(a)",
-      city: p?.city ?? "",
-      state: p?.state ?? "",
-      crm: d ? `${d.crm}/${d.crm_state}` : "",
-      available: d?.available ?? false,
-      avg,
-      count: rs.length,
-    };
-  }).filter((i) => !term || i.name.toLowerCase().includes(term.toLowerCase()));
+  const items = (data?.favs ?? [])
+    .map((f) => {
+      const p = data?.profiles.find((x) => x.id === f.doctor_id);
+      const d = data?.docs.find((x) => x.user_id === f.doctor_id);
+      const rs = (data?.reviews ?? []).filter((r) => r.doctor_id === f.doctor_id);
+      const avg = rs.length ? rs.reduce((a, r) => a + r.rating, 0) / rs.length : 0;
+      return {
+        ...f,
+        name: p?.full_name || "Médico(a)",
+        city: p?.city ?? "",
+        state: p?.state ?? "",
+        crm: d ? `${d.crm}/${d.crm_state}` : "",
+        available: d?.available ?? false,
+        avg,
+        count: rs.length,
+      };
+    })
+    .filter((i) => !term || i.name.toLowerCase().includes(term.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,7 +151,8 @@ function FavoritesPage() {
             ) : items.length === 0 ? (
               <div className="card-surface mt-6 p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Nenhum favorito ainda. Use o coração na busca de médicos para salvar profissionais.
+                  Nenhum favorito ainda. Use o coração na busca de médicos para salvar
+                  profissionais.
                 </p>
                 <Button asChild className="mt-5">
                   <Link to="/medicos">Buscar médicos</Link>
@@ -171,7 +185,10 @@ function FavoritesPage() {
                             {f.count > 0 ? `${f.avg.toFixed(1)} · ${f.count}` : "Sem avaliações"}
                           </p>
                         </div>
-                        <Badge variant={f.available ? "secondary" : "outline"} className="rounded-full">
+                        <Badge
+                          variant={f.available ? "secondary" : "outline"}
+                          className="rounded-full"
+                        >
                           {f.available ? "Disponível" : "Indisponível"}
                         </Badge>
                       </div>

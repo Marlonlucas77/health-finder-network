@@ -429,6 +429,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      shift_application_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          shift_id: string
+          applicant_count: number
+        }[]
+      }
     }
     Enums: {
       app_role: "medico" | "escalista" | "admin"
