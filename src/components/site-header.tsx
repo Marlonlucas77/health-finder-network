@@ -3,6 +3,7 @@ import { Menu, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { NotificationBell } from "@/components/notification-bell";
 
 const links = [
   { to: "/medicos", label: "Médicos" },
@@ -55,6 +56,7 @@ export function SiteHeader() {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
+              <NotificationBell />
               <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/painel" })}>
                 Meu painel
               </Button>
@@ -99,6 +101,10 @@ export function SiteHeader() {
               {nav}
               {user ? (
                 <>
+                  <div className="flex items-center gap-2">
+                    <NotificationBell />
+                    <span className="text-sm text-muted-foreground">Notificações</span>
+                  </div>
                   <Link to="/painel" className="text-sm font-medium">
                     Meu painel
                   </Link>
