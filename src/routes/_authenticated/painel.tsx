@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllHospitalOptions } from "@/lib/fetch-all-hospitals";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -112,8 +113,7 @@ function Painel() {
   });
   const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
-    queryFn: async () =>
-      (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
+    queryFn: async () => fetchAllHospitalOptions(),
   });
   const [hospSearch, setHospSearch] = useState("");
   const filteredHospitals = useMemo(() => {

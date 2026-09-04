@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { fetchAllHospitals } from "@/lib/fetch-all-hospitals";
 
 export const Route = createFileRoute("/hospitais")({
   head: () => ({
@@ -81,10 +82,7 @@ function HospitalsPage() {
 
   const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
-    queryFn: async () => {
-      const { data } = await supabase.from("hospitals").select("*").order("name");
-      return data ?? [];
-    },
+    queryFn: fetchAllHospitals,
   });
 
   const list = useMemo(() => {

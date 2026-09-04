@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllHospitalOptions } from "@/lib/fetch-all-hospitals";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/vagas")({
@@ -79,8 +80,7 @@ function ShiftsPage() {
 
   const { data: hospitals } = useQuery({
     queryKey: ["hospitals"],
-    queryFn: async () =>
-      (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
+    queryFn: async () => fetchAllHospitalOptions(),
   });
   const [hospSearch, setHospSearch] = useState("");
   const filteredHospitals = useMemo(() => {
