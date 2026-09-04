@@ -39,24 +39,24 @@ npm run dev
 
 ## Scripts disponíveis
 
-| Comando           | Descrição                                  |
-| ------------------ | ------------------------------------------- |
-| `npm run dev`       | Sobe o servidor de desenvolvimento (Vite)   |
-| `npm run build`     | Gera o build de produção                    |
-| `npm run build:dev` | Gera o build em modo desenvolvimento        |
-| `npm run preview`   | Serve o build de produção localmente        |
-| `npm run lint`      | Roda o ESLint                               |
-| `npm run format`    | Formata o código com Prettier               |
+| Comando             | Descrição                                 |
+| ------------------- | ----------------------------------------- |
+| `npm run dev`       | Sobe o servidor de desenvolvimento (Vite) |
+| `npm run build`     | Gera o build de produção                  |
+| `npm run build:dev` | Gera o build em modo desenvolvimento      |
+| `npm run preview`   | Serve o build de produção localmente      |
+| `npm run lint`      | Roda o ESLint                             |
+| `npm run format`    | Formata o código com Prettier             |
 
 ## Variáveis de ambiente
 
-| Variável                        | Onde é usada         | Descrição                                                          |
-| -------------------------------- | --------------------- | -------------------------------------------------------------------- |
-| `VITE_SUPABASE_URL`              | Client-side            | URL do projeto Supabase                                              |
-| `VITE_SUPABASE_PUBLISHABLE_KEY`  | Client-side            | Chave pública (anon) do Supabase, protegida por Row Level Security   |
-| `SUPABASE_URL`                   | Server-side (SSR)      | URL do projeto Supabase                                              |
-| `SUPABASE_PUBLISHABLE_KEY`       | Server-side (SSR)      | Chave pública (anon) do Supabase                                     |
-| `SUPABASE_SERVICE_ROLE_KEY`      | Server-side (admin)    | Chave com privilégios de administrador — **nunca** exponha ao client |
+| Variável                        | Onde é usada        | Descrição                                                            |
+| ------------------------------- | ------------------- | -------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`             | Client-side         | URL do projeto Supabase                                              |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Client-side         | Chave pública (anon) do Supabase, protegida por Row Level Security   |
+| `SUPABASE_URL`                  | Server-side (SSR)   | URL do projeto Supabase                                              |
+| `SUPABASE_PUBLISHABLE_KEY`      | Server-side (SSR)   | Chave pública (anon) do Supabase                                     |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server-side (admin) | Chave com privilégios de administrador — **nunca** exponha ao client |
 
 > ⚠️ **Nunca faça commit do arquivo `.env`.** Ele já está no `.gitignore`. Se precisar compartilhar variáveis de exemplo, use `.env.example`.
 

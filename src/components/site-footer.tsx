@@ -52,6 +52,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link to="/contato" className="hover:text-primary">
+                Fale conosco
+              </Link>
+            </li>
+            <li>
               <Link to="/painel" className="hover:text-primary">
                 Meu painel
               </Link>

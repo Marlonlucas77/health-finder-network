@@ -9,6 +9,7 @@ const links = [
   { to: "/hospitais", label: "Hospitais" },
   { to: "/vagas", label: "Vagas de plantão" },
   { to: "/como-funciona", label: "Como funciona" },
+  { to: "/contato", label: "Fale conosco" },
 ] as const;
 
 export function SiteHeader() {
