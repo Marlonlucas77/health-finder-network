@@ -20,8 +20,10 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Environment variables
-.env
+# Environment variables — .env is intentionally tracked (see .env for why:
+# it only holds public Supabase URL/publishable-key values that the Lovable
+# build pipeline reads directly from this file). Only *.local variants,
+# which are meant for real secrets, are ignored.
 .env.local
 .env.*.local
 
