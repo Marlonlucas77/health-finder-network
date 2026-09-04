@@ -98,6 +98,9 @@ function HospitalsPage() {
     );
   }, [hospitals, term]);
 
+  const [visibleCount, setVisibleCount] = useState(30);
+  const visibleList = useMemo(() => list.slice(0, visibleCount), [list, visibleCount]);
+
   async function create() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
@@ -247,34 +250,46 @@ function HospitalsPage() {
             Nenhum hospital cadastrado ainda.
           </p>
         ) : (
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {list.map((h) => (
-              <article key={h.id} className="card-surface p-5">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <Building2 className="size-5" />
-                </span>
-                <h2 className="mt-4 font-display text-base font-semibold">{h.name}</h2>
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="size-3.5" /> {h.city}/{h.state}
-                </p>
-                <Badge variant="secondary" className="mt-3 rounded-full text-xs">
-                  {h.type}
-                </Badge>
-                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                  {h.phone ? (
-                    <p className="flex items-center gap-1">
-                      <Phone className="size-3.5" /> {h.phone}
-                    </p>
-                  ) : null}
-                  {h.website ? (
-                    <p className="flex items-center gap-1 truncate">
-                      <Globe className="size-3.5" /> {h.website}
-                    </p>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {visibleList.map((h) => (
+                <article key={h.id} className="card-surface p-5">
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
+                    <Building2 className="size-5" />
+                  </span>
+                  <h2 className="mt-4 font-display text-base font-semibold">{h.name}</h2>
+                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="size-3.5" /> {h.city}/{h.state}
+                  </p>
+                  <Badge variant="secondary" className="mt-3 rounded-full text-xs">
+                    {h.type}
+                  </Badge>
+                  <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                    {h.phone ? (
+                      <p className="flex items-center gap-1">
+                        <Phone className="size-3.5" /> {h.phone}
+                      </p>
+                    ) : null}
+                    {h.website ? (
+                      <p className="flex items-center gap-1 truncate">
+                        <Globe className="size-3.5" /> {h.website}
+                      </p>
+                    ) : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Mostrando {visibleList.length} de {list.length}
+            </p>
+            {visibleCount < list.length && (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" onClick={() => setVisibleCount((c) => c + 30)}>
+                  Carregar mais
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </main>
       <SiteFooter />

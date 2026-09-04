@@ -115,6 +115,20 @@ function Painel() {
     queryFn: async () =>
       (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
   });
+  const [hospSearch, setHospSearch] = useState("");
+  const filteredHospitals = useMemo(() => {
+    const t = hospSearch.toLowerCase().trim();
+    const base = hospitals ?? [];
+    const matches = t
+      ? base.filter(
+          (h) =>
+            h.name.toLowerCase().includes(t) ||
+            h.city.toLowerCase().includes(t) ||
+            h.state.toLowerCase().includes(t),
+        )
+      : base;
+    return matches.slice(0, 40);
+  }, [hospitals, hospSearch]);
 
   useEffect(() => {
     if (!data) return;
@@ -473,26 +487,44 @@ function Painel() {
                     </Link>
                   </p>
                 ) : (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(hospitals ?? []).map((h) => {
-                      const on = hospIds.includes(h.id);
-                      return (
-                        <button
-                          key={h.id}
-                          type="button"
-                          onClick={() => toggleHospital(h.id, !on)}
-                          className={cn(
-                            "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                            on
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border hover:border-primary/60",
-                          )}
-                        >
-                          {h.name} · {h.city}/{h.state}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <>
+                    <Input
+                      className="mt-3 max-w-sm"
+                      placeholder="Buscar hospital por nome, cidade ou UF"
+                      value={hospSearch}
+                      maxLength={80}
+                      onChange={(e) => setHospSearch(e.target.value)}
+                    />
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {(hospitals ?? [])
+                        .filter((h) => hospIds.includes(h.id))
+                        .concat(filteredHospitals.filter((h) => !hospIds.includes(h.id)))
+                        .map((h) => {
+                          const on = hospIds.includes(h.id);
+                          return (
+                            <button
+                              key={h.id}
+                              type="button"
+                              onClick={() => toggleHospital(h.id, !on)}
+                              className={cn(
+                                "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                                on
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-border hover:border-primary/60",
+                              )}
+                            >
+                              {h.name} · {h.city}/{h.state}
+                            </button>
+                          );
+                        })}
+                    </div>
+                    {!hospSearch && (hospitals?.length ?? 0) > filteredHospitals.length && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Mostrando {filteredHospitals.length} de {hospitals?.length}. Use a busca
+                        para encontrar outros.
+                      </p>
+                    )}
+                  </>
                 )}
               </section>
             </TabsContent>
@@ -520,6 +552,13 @@ function Painel() {
               </div>
               <div className="space-y-2">
                 <Label>Hospital vinculado</Label>
+                <Input
+                  className="mb-2"
+                  placeholder="Buscar hospital por nome, cidade ou UF"
+                  value={hospSearch}
+                  maxLength={80}
+                  onChange={(e) => setHospSearch(e.target.value)}
+                />
                 <Select
                   value={scheduler.hospital_id}
                   onValueChange={(v) => setScheduler((s) => ({ ...s, hospital_id: v }))}
@@ -528,7 +567,7 @@ function Painel() {
                     <SelectValue placeholder="Selecione (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(hospitals ?? []).map((h) => (
+                    {filteredHospitals.map((h) => (
                       <SelectItem key={h.id} value={h.id}>
                         {h.name} — {h.city}/{h.state}
                       </SelectItem>

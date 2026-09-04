@@ -82,6 +82,20 @@ function ShiftsPage() {
     queryFn: async () =>
       (await supabase.from("hospitals").select("id, name, city, state").order("name")).data ?? [],
   });
+  const [hospSearch, setHospSearch] = useState("");
+  const filteredHospitals = useMemo(() => {
+    const t = hospSearch.toLowerCase().trim();
+    const base = hospitals ?? [];
+    const matches = t
+      ? base.filter(
+          (h) =>
+            h.name.toLowerCase().includes(t) ||
+            h.city.toLowerCase().includes(t) ||
+            h.state.toLowerCase().includes(t),
+        )
+      : base;
+    return matches.slice(0, 40);
+  }, [hospitals, hospSearch]);
   const { data: specialties } = useQuery({
     queryKey: ["specialties"],
     queryFn: async () =>
@@ -208,6 +222,13 @@ function ShiftsPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Hospital</Label>
+                    <Input
+                      className="mb-2"
+                      placeholder="Buscar hospital por nome, cidade ou UF"
+                      value={hospSearch}
+                      maxLength={80}
+                      onChange={(e) => setHospSearch(e.target.value)}
+                    />
                     <Select
                       value={form.hospital_id}
                       onValueChange={(v) => setForm((f) => ({ ...f, hospital_id: v }))}
@@ -216,7 +237,7 @@ function ShiftsPage() {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        {(hospitals ?? []).map((h) => (
+                        {filteredHospitals.map((h) => (
                           <SelectItem key={h.id} value={h.id}>
                             {h.name} — {h.city}/{h.state}
                           </SelectItem>
