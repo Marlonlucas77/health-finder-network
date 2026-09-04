@@ -668,6 +668,13 @@ export type Database = {
           years_experience: number
         }[]
       }
+      shift_application_counts: {
+        Args: never
+        Returns: {
+          applicant_count: number
+          shift_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "medico" | "escalista" | "admin"
