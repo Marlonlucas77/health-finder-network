@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Building2, MapPin, Plus, Search, Globe, Phone } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,13 +36,23 @@ export const Route = createFileRoute("/hospitais")({
         content: "Consulte e cadastre hospitais, prontos-socorros e clínicas por cidade e estado.",
       },
       { property: "og:title", content: "Hospitais cadastrados | EscalaMed" },
-      { property: "og:description", content: "Rede de hospitais e unidades de saúde do EscalaMed." },
+      {
+        property: "og:description",
+        content: "Rede de hospitais e unidades de saúde do EscalaMed.",
+      },
     ],
   }),
   component: HospitalsPage,
 });
 
-const TYPES = ["Hospital Geral", "Pronto-Socorro", "UPA", "Maternidade", "Clínica", "Hospital Universitário"];
+const TYPES = [
+  "Hospital Geral",
+  "Pronto-Socorro",
+  "UPA",
+  "Maternidade",
+  "Clínica",
+  "Hospital Universitário",
+];
 
 const schema = z.object({
   name: z.string().trim().min(3, "Informe o nome do hospital").max(140),
@@ -107,7 +118,15 @@ function HospitalsPage() {
     }
     toast.success("Hospital cadastrado");
     setOpen(false);
-    setForm({ name: "", city: "", state: "", type: TYPES[0]!, phone: "", website: "", address: "" });
+    setForm({
+      name: "",
+      city: "",
+      state: "",
+      type: TYPES[0]!,
+      phone: "",
+      website: "",
+      address: "",
+    });
     queryClient.invalidateQueries({ queryKey: ["hospitals"] });
   }
 
@@ -148,12 +167,20 @@ function HospitalsPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="h-state">UF</Label>
-                      <Input id="h-state" value={form.state} onChange={set("state")} maxLength={2} />
+                      <Input
+                        id="h-state"
+                        value={form.state}
+                        onChange={set("state")}
+                        maxLength={2}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Tipo</Label>
-                    <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
+                    <Select
+                      value={form.type}
+                      onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -168,16 +195,31 @@ function HospitalsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="h-address">Endereço</Label>
-                    <Input id="h-address" value={form.address} onChange={set("address")} maxLength={200} />
+                    <Input
+                      id="h-address"
+                      value={form.address}
+                      onChange={set("address")}
+                      maxLength={200}
+                    />
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="h-phone">Telefone</Label>
-                      <Input id="h-phone" value={form.phone} onChange={set("phone")} maxLength={20} />
+                      <Input
+                        id="h-phone"
+                        value={form.phone}
+                        onChange={set("phone")}
+                        maxLength={20}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="h-site">Site</Label>
-                      <Input id="h-site" value={form.website} onChange={set("website")} maxLength={200} />
+                      <Input
+                        id="h-site"
+                        value={form.website}
+                        onChange={set("website")}
+                        maxLength={200}
+                      />
                     </div>
                   </div>
                   <Button className="w-full" onClick={create}>
@@ -235,6 +277,7 @@ function HospitalsPage() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

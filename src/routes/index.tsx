@@ -30,7 +30,11 @@ function Index() {
   const { data: specialties } = useQuery({
     queryKey: ["specialties", "home"],
     queryFn: async () => {
-      const { data } = await supabase.from("specialties").select("id, name, slug").order("name").limit(14);
+      const { data } = await supabase
+        .from("specialties")
+        .select("id, name, slug")
+        .order("name")
+        .limit(14);
       return data ?? [];
     },
   });
@@ -38,7 +42,9 @@ function Index() {
   const { data: hospitalCount } = useQuery({
     queryKey: ["hospital-count"],
     queryFn: async () => {
-      const { count } = await supabase.from("hospitals").select("id", { count: "exact", head: true });
+      const { count } = await supabase
+        .from("hospitals")
+        .select("id", { count: "exact", head: true });
       return count ?? 0;
     },
   });

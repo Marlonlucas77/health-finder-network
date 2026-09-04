@@ -22,7 +22,8 @@ export const Route = createFileRoute("/auth")({
       { title: "Entrar ou criar conta | EscalaMed" },
       {
         name: "description",
-        content: "Acesse o EscalaMed como médico ou escalista para encontrar plantões e profissionais.",
+        content:
+          "Acesse o EscalaMed como médico ou escalista para encontrar plantões e profissionais.",
       },
       { property: "og:title", content: "Entrar ou criar conta | EscalaMed" },
       { property: "og:description", content: "Cadastro gratuito para médicos e escalistas." },
@@ -155,7 +156,13 @@ function AuthPage() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">E-mail</Label>
-                  <Input id="login-email" type="email" value={form.email} onChange={set("email")} required />
+                  <Input
+                    id="login-email"
+                    type="email"
+                    value={form.email}
+                    onChange={set("email")}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Senha</Label>
@@ -201,11 +208,23 @@ function AuthPage() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome completo</Label>
-                  <Input id="name" value={form.fullName} onChange={set("fullName")} maxLength={120} required />
+                  <Input
+                    id="name"
+                    value={form.fullName}
+                    onChange={set("fullName")}
+                    maxLength={120}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">E-mail</Label>
-                  <Input id="email" type="email" value={form.email} onChange={set("email")} required />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={form.email}
+                    onChange={set("email")}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>

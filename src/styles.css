@@ -83,10 +83,17 @@
   --input: oklch(0.9 0.015 215);
   --ring: oklch(0.52 0.098 205);
   --gold: oklch(0.79 0.15 82);
-  --gradient-hero: linear-gradient(135deg, oklch(0.32 0.07 230) 0%, oklch(0.45 0.1 205) 55%, oklch(0.6 0.11 175) 100%);
+  --gradient-hero: linear-gradient(
+    135deg,
+    oklch(0.32 0.07 230) 0%,
+    oklch(0.45 0.1 205) 55%,
+    oklch(0.6 0.11 175) 100%
+  );
   --gradient-accent: linear-gradient(120deg, oklch(0.52 0.098 205), oklch(0.68 0.13 168));
-  --shadow-soft: 0 1px 2px oklch(0.24 0.035 235 / 0.06), 0 8px 24px -12px oklch(0.24 0.035 235 / 0.18);
-  --shadow-lift: 0 2px 4px oklch(0.24 0.035 235 / 0.06), 0 18px 40px -18px oklch(0.24 0.035 235 / 0.28);
+  --shadow-soft:
+    0 1px 2px oklch(0.24 0.035 235 / 0.06), 0 8px 24px -12px oklch(0.24 0.035 235 / 0.18);
+  --shadow-lift:
+    0 2px 4px oklch(0.24 0.035 235 / 0.06), 0 18px 40px -18px oklch(0.24 0.035 235 / 0.28);
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --chart-1: oklch(0.646 0.222 41.116);
@@ -103,7 +110,6 @@
   --sidebar-border: oklch(0.9 0.015 215);
   --sidebar-ring: oklch(0.52 0.098 205);
 }
-
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
@@ -161,7 +167,11 @@
   body {
     font-family: var(--font-body);
   }
-  h1, h2, h3, h4, .font-display {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }

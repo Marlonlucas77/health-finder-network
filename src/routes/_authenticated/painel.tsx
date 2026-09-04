@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { RolePicker } from "@/components/role-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -304,6 +305,8 @@ function Painel() {
             </Badge>
           ))}
         </div>
+
+        {roles.length === 0 && <RolePicker />}
 
         <Tabs defaultValue="perfil" className="mt-8">
           <TabsList>

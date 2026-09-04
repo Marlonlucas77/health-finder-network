@@ -89,7 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "EscalaMed — Médicos e escalistas conectados" },
       {
         property: "og:description",
-        content: "Encontre médicos por especialidade, cidade e avaliação. Publique e preencha plantões.",
+        content:
+          "Encontre médicos por especialidade, cidade e avaliação. Publique e preencha plantões.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

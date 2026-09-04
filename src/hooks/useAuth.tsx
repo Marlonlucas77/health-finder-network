@@ -12,6 +12,7 @@ type AuthState = {
   isMedico: boolean;
   isEscalista: boolean;
   signOut: () => Promise<void>;
+  refreshRoles: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -34,6 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const userId = session?.user.id;
+
+  const fetchRoles = async (uid: string) => {
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    setRoles((data ?? []).map((r) => r.role as AppRole));
+  };
+
   useEffect(() => {
     if (!userId) return;
     let active = true;
@@ -58,6 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isEscalista: roles.includes("escalista"),
     signOut: async () => {
       await supabase.auth.signOut();
+    },
+    refreshRoles: async () => {
+      if (userId) await fetchRoles(userId);
     },
   };
 
