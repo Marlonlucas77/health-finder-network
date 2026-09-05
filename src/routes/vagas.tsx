@@ -197,43 +197,6 @@ function ShiftsPage() {
     queryClient.invalidateQueries({ queryKey: ["shifts"] });
   }
 
-  const [expandedShiftId, setExpandedShiftId] = useState<string | null>(null);
-
-  const { data: applicants } = useQuery({
-    queryKey: ["shift-applicants", expandedShiftId],
-    enabled: !!expandedShiftId,
-    queryFn: async () => {
-      const { data: apps } = await supabase
-        .from("shift_applications")
-        .select("id, doctor_id, status, message")
-        .eq("shift_id", expandedShiftId!)
-        .order("created_at", { ascending: true });
-      const list = apps ?? [];
-      const doctorIds = list.map((a) => a.doctor_id);
-      if (doctorIds.length === 0) return [];
-      const [{ data: profiles }, { data: doctorProfiles }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name").in("id", doctorIds),
-        supabase.from("doctor_profiles").select("user_id, crm, crm_state").in("user_id", doctorIds),
-      ]);
-      return list.map((a) => ({
-        ...a,
-        full_name: profiles?.find((p) => p.id === a.doctor_id)?.full_name ?? "Médico",
-        crm: doctorProfiles?.find((d) => d.user_id === a.doctor_id)?.crm ?? null,
-        crm_state: doctorProfiles?.find((d) => d.user_id === a.doctor_id)?.crm_state ?? null,
-      }));
-    },
-  });
-
-  async function decideApplication(id: string, status: "aceita" | "recusada") {
-    const { error } = await supabase.from("shift_applications").update({ status }).eq("id", id);
-    if (error) {
-      toast.error("Não foi possível atualizar a candidatura");
-      return;
-    }
-    toast.success(status === "aceita" ? "Candidatura aceita" : "Candidatura recusada");
-    queryClient.invalidateQueries({ queryKey: ["shift-applicants", expandedShiftId] });
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -485,65 +448,6 @@ function ShiftsPage() {
                         >
                           {applied ? "Candidatura enviada" : "Candidatar-me"}
                         </Button>
-                      )}
-                      {user?.id === s.created_by && applicationCount > 0 && (
-                        <div className="mt-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setExpandedShiftId(expandedShiftId === s.id ? null : s.id)
-                            }
-                          >
-                            {expandedShiftId === s.id ? "Ocultar candidatos" : "Ver candidatos"}
-                          </Button>
-                          {expandedShiftId === s.id && (
-                            <div className="mt-3 space-y-2 border-t border-border pt-3">
-                              {(applicants ?? []).length === 0 ? (
-                                <p className="text-xs text-muted-foreground">Carregando...</p>
-                              ) : (
-                                (applicants ?? []).map((a) => (
-                                  <div
-                                    key={a.id}
-                                    className="flex items-center justify-between gap-2 rounded-lg border border-border p-2.5 text-sm"
-                                  >
-                                    <div>
-                                      <p className="font-medium">{a.full_name}</p>
-                                      {a.crm && (
-                                        <p className="text-xs text-muted-foreground">
-                                          CRM {a.crm}/{a.crm_state}
-                                        </p>
-                                      )}
-                                    </div>
-                                    {a.status === "pendente" ? (
-                                      <div className="flex gap-1.5">
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => decideApplication(a.id, "recusada")}
-                                        >
-                                          Recusar
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          onClick={() => decideApplication(a.id, "aceita")}
-                                        >
-                                          Aceitar
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <Badge
-                                        variant={a.status === "aceita" ? "default" : "outline"}
-                                      >
-                                        {a.status}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
                       )}
                     </article>
                   );

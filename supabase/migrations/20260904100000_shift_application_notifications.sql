@@ -72,7 +72,7 @@ BEGIN
     WHERE s.id = NEW.shift_id;
 
     v_title := CASE NEW.status
-      WHEN 'aceita' THEN 'Candidatura aceita'
+      WHEN 'aprovada' THEN 'Candidatura aprovada'
       WHEN 'recusada' THEN 'Candidatura recusada'
       ELSE 'Atualização na sua candidatura'
     END;
