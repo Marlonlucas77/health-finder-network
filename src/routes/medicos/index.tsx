@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Stars } from "@/components/stars";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { initials } from "@/components/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -147,6 +149,7 @@ function DoctorsPage() {
           city: p?.city ?? "",
           state: p?.state ?? "",
           bio: p?.bio ?? "",
+          avatar_url: p?.avatar_url ?? null,
           specIds,
           specNames: specIds.map((id) => specName.get(id) ?? "").filter(Boolean),
           rating,
@@ -420,13 +423,21 @@ function DoctorsPage() {
                       className="card-surface block p-5 transition-shadow hover:shadow-lift"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="font-display text-lg font-semibold">{d.name}</h2>
-                          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                            <MapPin className="size-3.5" />
-                            {d.city || "Cidade não informada"}
-                            {d.state ? ` · ${d.state}` : ""}
-                          </p>
+                        <div className="flex items-start gap-3">
+                          <Avatar className="size-11 shrink-0">
+                            <AvatarImage src={d.avatar_url ?? undefined} alt={d.name} />
+                            <AvatarFallback className="text-sm font-semibold text-primary">
+                              {initials(d.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h2 className="font-display text-lg font-semibold">{d.name}</h2>
+                            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                              <MapPin className="size-3.5" />
+                              {d.city || "Cidade não informada"}
+                              {d.state ? ` · ${d.state}` : ""}
+                            </p>
+                          </div>
                         </div>
                         <div className={isEscalista ? "mr-10 text-right" : "text-right"}>
                           <Stars value={d.rating.avg} />

@@ -6,6 +6,8 @@ import { z } from "zod";
 import { MapPin, BadgeCheck, Clock, Phone, Building2, Mail } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Stars } from "@/components/stars";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { initials } from "@/components/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -147,21 +149,32 @@ function DoctorDetail() {
           <>
             <section className="card-surface p-6 sm:p-8">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-3xl font-semibold">
-                    {data.profile.full_name || "Médico(a)"}
-                  </h1>
-                  <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="size-4" />
-                    {data.profile.city || "Cidade não informada"}
-                    {data.profile.state ? ` · ${data.profile.state}` : ""}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {data.specs.map((s) => (
-                      <Badge key={s.specialty_id} variant="secondary" className="rounded-full">
-                        {s.specialties?.name}
-                      </Badge>
-                    ))}
+                <div className="flex items-start gap-4">
+                  <Avatar className="size-16 shrink-0 sm:size-20">
+                    <AvatarImage
+                      src={data.profile.avatar_url ?? undefined}
+                      alt={data.profile.full_name || "Médico(a)"}
+                    />
+                    <AvatarFallback className="text-xl font-semibold text-primary">
+                      {initials(data.profile.full_name || "?")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h1 className="text-3xl font-semibold">
+                      {data.profile.full_name || "Médico(a)"}
+                    </h1>
+                    <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="size-4" />
+                      {data.profile.city || "Cidade não informada"}
+                      {data.profile.state ? ` · ${data.profile.state}` : ""}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {data.specs.map((s) => (
+                        <Badge key={s.specialty_id} variant="secondary" className="rounded-full">
+                          {s.specialties?.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="text-right">

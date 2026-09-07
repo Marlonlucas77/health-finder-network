@@ -6,6 +6,7 @@ import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { RolePicker } from "@/components/role-picker";
+import { AvatarUpload } from "@/components/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -332,6 +333,12 @@ function Painel() {
           </TabsList>
 
           <TabsContent value="perfil" className="card-surface mt-6 space-y-4 p-6">
+            <AvatarUpload
+              userId={uid}
+              fullName={profile.full_name}
+              avatarUrl={data?.profile?.avatar_url ?? null}
+              onUploaded={refresh}
+            />
             <div className="space-y-2">
               <Label htmlFor="p-name">Nome completo</Label>
               <Input
