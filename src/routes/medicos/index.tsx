@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { MapPin, Search, BadgeCheck, Clock, Heart } from "lucide-react";
+import { MapPin, Search, BadgeCheck, Clock, Heart, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -44,6 +44,7 @@ type DoctorRow = {
   user_id: string;
   crm: string;
   crm_state: string;
+  crm_verified: boolean;
   years_experience: number;
   hourly_rate: number | null;
   available: boolean;
@@ -466,6 +467,11 @@ function DoctorsPage() {
                         <span className="flex items-center gap-1">
                           <BadgeCheck className="size-3.5" /> CRM {d.crm}/{d.crm_state}
                         </span>
+                        {d.crm_verified && (
+                          <Badge variant="default" className="gap-1 rounded-full text-[11px]">
+                            <ShieldCheck className="size-3" /> CRM verificado
+                          </Badge>
+                        )}
                         <span className="flex items-center gap-1">
                           <Clock className="size-3.5" /> {d.years_experience} anos
                         </span>

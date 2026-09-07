@@ -16,6 +16,7 @@ import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as VagasRouteImport } from './routes/vagas'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
@@ -55,6 +56,11 @@ const VagasRoute = VagasRouteImport.update({
   path: '/vagas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
   id: '/favoritos',
   path: '/favoritos',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/hospitais': typeof HospitaisRoute
   '/vagas': typeof VagasRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/favoritos': typeof AuthenticatedFavoritosRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/hospitais'
     | '/vagas'
+    | '/admin'
     | '/favoritos'
     | '/painel'
     | '/medicos/$id'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/hospitais'
     | '/vagas'
+    | '/admin'
     | '/favoritos'
     | '/painel'
     | '/medicos/$id'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/hospitais'
     | '/vagas'
+    | '/_authenticated/admin'
     | '/_authenticated/favoritos'
     | '/_authenticated/painel'
     | '/medicos/$id'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VagasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/favoritos': {
       id: '/_authenticated/favoritos'
       path: '/favoritos'
@@ -249,11 +268,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedFavoritosRoute: typeof AuthenticatedFavoritosRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedFavoritosRoute: AuthenticatedFavoritosRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
 }

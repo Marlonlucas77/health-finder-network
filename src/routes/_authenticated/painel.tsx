@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { RolePicker } from "@/components/role-picker";
 import { AvatarUpload } from "@/components/avatar-upload";
+import { CrmVerification } from "@/components/crm-verification";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -456,6 +457,8 @@ function Painel() {
                 </div>
                 <Button onClick={saveDoctor}>Salvar dados médicos</Button>
               </section>
+
+              <CrmVerification userId={uid} crmVerified={data?.doctor?.crm_verified ?? false} />
 
               <section className="card-surface p-6">
                 <h2 className="text-lg font-semibold">Minhas especialidades</h2>

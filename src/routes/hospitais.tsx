@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Building2, MapPin, Plus, Search, Globe, Phone } from "lucide-react";
+import { Building2, MapPin, Plus, Search, Globe, Phone, TriangleAlert } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -99,10 +99,40 @@ function HospitalsPage() {
   const [visibleCount, setVisibleCount] = useState(30);
   const visibleList = useMemo(() => list.slice(0, visibleCount), [list, visibleCount]);
 
+  const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
+
+  function normalize(s: string) {
+    return s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  const possibleDuplicates = useMemo(() => {
+    const name = normalize(form.name);
+    const city = form.city.toLowerCase().trim();
+    const state = form.state.toLowerCase().trim();
+    if (name.length < 4 || !city || state.length !== 2) return [];
+    return (hospitals ?? []).filter((h) => {
+      if (h.city.toLowerCase().trim() !== city || h.state.toLowerCase().trim() !== state) {
+        return false;
+      }
+      const hName = normalize(h.name);
+      return hName === name || hName.includes(name) || name.includes(hName);
+    });
+  }, [hospitals, form.name, form.city, form.state]);
+
   async function create() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
+      return;
+    }
+    if (possibleDuplicates.length > 0 && !duplicateConfirmed) {
+      toast.error("Confirme que não é duplicado antes de cadastrar.");
       return;
     }
     const { error } = await supabase.from("hospitals").insert({
@@ -117,8 +147,9 @@ function HospitalsPage() {
       toast.error("Não foi possível cadastrar o hospital");
       return;
     }
-    toast.success("Hospital cadastrado");
+    toast.success("Hospital cadastrado! Ele passará por uma checagem antes de ficar público.");
     setOpen(false);
+    setDuplicateConfirmed(false);
     setForm({
       name: "",
       city: "",
@@ -223,6 +254,28 @@ function HospitalsPage() {
                       />
                     </div>
                   </div>
+                  {possibleDuplicates.length > 0 && (
+                    <div className="rounded-lg border border-amber-400/50 bg-amber-50 p-3 text-sm dark:bg-amber-950/30">
+                      <p className="flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-400">
+                        <TriangleAlert className="size-4" /> Pode já existir esse hospital
+                      </p>
+                      <ul className="mt-1.5 space-y-0.5 text-amber-700/90 dark:text-amber-400/90">
+                        {possibleDuplicates.slice(0, 3).map((h) => (
+                          <li key={h.id}>
+                            {h.name} — {h.city}/{h.state}
+                          </li>
+                        ))}
+                      </ul>
+                      <label className="mt-2 flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400">
+                        <input
+                          type="checkbox"
+                          checked={duplicateConfirmed}
+                          onChange={(e) => setDuplicateConfirmed(e.target.checked)}
+                        />
+                        Não é duplicado, quero cadastrar mesmo assim
+                      </label>
+                    </div>
+                  )}
                   <Button className="w-full" onClick={create}>
                     Salvar hospital
                   </Button>

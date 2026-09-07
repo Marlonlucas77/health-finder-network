@@ -657,6 +657,14 @@ export type Database = {
         };
         Returns: undefined;
       };
+      review_verification_request: {
+        Args: {
+          _approve: boolean;
+          _note?: string;
+          _request_id: string;
+        };
+        Returns: undefined;
+      };
       search_doctors: {
         Args: {
           _city?: string;

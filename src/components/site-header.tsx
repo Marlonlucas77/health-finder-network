@@ -14,7 +14,7 @@ const links = [
 ] as const;
 
 export function SiteHeader() {
-  const { user, signOut, isEscalista } = useAuth();
+  const { user, signOut, isEscalista, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const nav = (
@@ -60,6 +60,11 @@ export function SiteHeader() {
               <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/painel" })}>
                 Meu painel
               </Button>
+              {isAdmin && (
+                <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/admin" })}>
+                  Administração
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { MapPin, BadgeCheck, Clock, Phone, Building2, Mail } from "lucide-react";
+import { MapPin, BadgeCheck, Clock, Phone, Building2, Mail, ShieldCheck } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Stars } from "@/components/stars";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -191,10 +191,15 @@ function DoctorDetail() {
               </div>
 
               <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-                <p className="flex items-center gap-2">
+                <p className="flex flex-wrap items-center gap-2">
                   <BadgeCheck className="size-4 text-primary" /> CRM {data.doctor.crm}/
                   {data.doctor.crm_state}
                   {data.doctor.has_rqe ? " · RQE" : ""}
+                  {data.doctor.crm_verified && (
+                    <Badge variant="default" className="gap-1 rounded-full text-[11px]">
+                      <ShieldCheck className="size-3" /> Verificado
+                    </Badge>
+                  )}
                 </p>
                 <p className="flex items-center gap-2">
                   <Clock className="size-4 text-primary" /> {data.doctor.years_experience} anos de

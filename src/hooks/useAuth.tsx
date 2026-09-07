@@ -11,6 +11,7 @@ type AuthState = {
   loading: boolean;
   isMedico: boolean;
   isEscalista: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
 };
@@ -63,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     isMedico: roles.includes("medico"),
     isEscalista: roles.includes("escalista"),
+    isAdmin: roles.includes("admin"),
     signOut: async () => {
       await supabase.auth.signOut();
     },
