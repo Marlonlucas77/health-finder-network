@@ -15,13 +15,18 @@ const links = [
 ] as const;
 
 export function SiteHeader() {
-  const { user, signOut, isEscalista, isAdmin } = useAuth();
+  const { user, signOut, isMedico, isEscalista, isAdmin } = useAuth();
   const navigate = useNavigate();
   const unreadMessages = useUnreadMessagesCount();
 
+  // The doctor directory is for escalistas to search and contact médicos;
+  // a médico-only account (no escalista/admin role) has no use for it.
+  const medicoOnly = !!user && isMedico && !isEscalista && !isAdmin;
+  const visibleLinks = links.filter((l) => !(l.to === "/medicos" && medicoOnly));
+
   const nav = (
     <>
-      {links.map((l) => (
+      {visibleLinks.map((l) => (
         <Link
           key={l.to}
           to={l.to}

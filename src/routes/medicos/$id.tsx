@@ -51,9 +51,13 @@ const reviewSchema = z.object({
 
 function DoctorDetail() {
   const { id } = Route.useParams();
-  const { user, isEscalista } = useAuth();
+  const { user, isMedico, isEscalista, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  // A médico-only account may still preview their own public profile, but
+  // has no business reason to browse other médicos' profiles — that's the
+  // escalista directory's job.
+  const blocked = !!user && isMedico && !isEscalista && !isAdmin && user.id !== id;
   const [scores, setScores] = useState({
     rating: 5,
     punctuality: 5,
@@ -65,7 +69,7 @@ function DoctorDetail() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["doctor", id],
-    enabled: !!user,
+    enabled: !!user && !blocked,
     queryFn: async () => {
       const [profile, doctor, specs, hospitals, reviews] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
@@ -142,6 +146,24 @@ function DoctorDetail() {
             <Link to="/auth" search={{ mode: "login" }}>
               Entrar
             </Link>
+          </Button>
+        </main>
+      </div>
+    );
+  }
+
+  if (blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="mx-auto max-w-3xl px-4 py-20 text-center">
+          <h1 className="text-2xl font-semibold">Esta área é para escalistas</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Perfis de outros médicos são visíveis para escalistas, que buscam e avaliam
+            profissionais.
+          </p>
+          <Button asChild className="mt-6">
+            <Link to="/painel">Ir para meu painel</Link>
           </Button>
         </main>
       </div>

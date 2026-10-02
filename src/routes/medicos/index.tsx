@@ -53,7 +53,11 @@ type DoctorRow = {
 };
 
 function DoctorsPage() {
-  const { user, isEscalista } = useAuth();
+  const { user, isMedico, isEscalista, isAdmin } = useAuth();
+  // The doctor directory is for escalistas (and admins) to search and
+  // contact médicos; a médico-only account has no business reason to browse
+  // other médicos' profiles.
+  const medicoOnly = !!user && isMedico && !isEscalista && !isAdmin;
   const qc = useQueryClient();
   const [term, setTerm] = useState("");
   const [city, setCity] = useState("all");
@@ -77,7 +81,7 @@ function DoctorsPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["doctors"],
-    enabled: !!user,
+    enabled: !!user && !medicoOnly,
     queryFn: async () => {
       const [doctors, profiles, links, reviews] = await Promise.all([
         supabase.from("doctor_profiles").select("*"),
@@ -254,6 +258,17 @@ function DoctorsPage() {
               <Link to="/auth" search={{ mode: "login" }}>
                 Entrar ou criar conta
               </Link>
+            </Button>
+          </div>
+        ) : medicoOnly ? (
+          <div className="card-surface mt-8 p-8 text-center">
+            <h2 className="text-lg font-semibold">Esta área é para escalistas</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A busca de médicos é usada por escalistas para encontrar e contatar profissionais.
+              Como médico(a), gerencie seu próprio perfil no seu painel.
+            </p>
+            <Button asChild className="mt-5">
+              <Link to="/painel">Ir para meu painel</Link>
             </Button>
           </div>
         ) : (
