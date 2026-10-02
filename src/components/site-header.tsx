@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
 import { NotificationBell } from "@/components/notification-bell";
+import { useUnreadMessagesCount } from "@/hooks/use-unread-messages-count";
 
 const links = [
   { to: "/medicos", label: "Médicos" },
@@ -16,6 +17,7 @@ const links = [
 export function SiteHeader() {
   const { user, signOut, isEscalista, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const unreadMessages = useUnreadMessagesCount();
 
   const nav = (
     <>
@@ -57,6 +59,19 @@ export function SiteHeader() {
           {user ? (
             <>
               <NotificationBell />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative"
+                onClick={() => navigate({ to: "/mensagens", search: { with: undefined } })}
+              >
+                Mensagens
+                {unreadMessages > 0 && (
+                  <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
+                  </span>
+                )}
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/painel" })}>
                 Meu painel
               </Button>
@@ -110,6 +125,13 @@ export function SiteHeader() {
                     <NotificationBell />
                     <span className="text-sm text-muted-foreground">Notificações</span>
                   </div>
+                  <Link
+                    to="/mensagens"
+                    search={{ with: undefined }}
+                    className="text-sm font-medium"
+                  >
+                    Mensagens{unreadMessages > 0 ? ` (${unreadMessages})` : ""}
+                  </Link>
                   <Link to="/painel" className="text-sm font-medium">
                     Meu painel
                   </Link>

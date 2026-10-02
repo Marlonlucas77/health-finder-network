@@ -18,6 +18,7 @@ import { Route as HospitaisRouteImport } from './routes/hospitais'
 import { Route as VagasRouteImport } from './routes/vagas'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFavoritosRouteImport } from './routes/_authenticated/favoritos'
+import { Route as AuthenticatedMensagensRouteImport } from './routes/_authenticated/mensagens'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as MedicosIndexRouteImport } from './routes/medicos/index'
 import { Route as MedicosIdRouteImport } from './routes/medicos/$id'
@@ -66,6 +67,11 @@ const AuthenticatedFavoritosRoute = AuthenticatedFavoritosRouteImport.update({
   path: '/favoritos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMensagensRoute = AuthenticatedMensagensRouteImport.update({
+  id: '/mensagens',
+  path: '/mensagens',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/vagas': typeof VagasRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
+  '/mensagens': typeof AuthenticatedMensagensRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/vagas': typeof VagasRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/favoritos': typeof AuthenticatedFavoritosRoute
+  '/mensagens': typeof AuthenticatedMensagensRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos': typeof MedicosIndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/vagas': typeof VagasRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/favoritos': typeof AuthenticatedFavoritosRoute
+  '/_authenticated/mensagens': typeof AuthenticatedMensagensRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/medicos/$id': typeof MedicosIdRoute
   '/medicos/': typeof MedicosIndexRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/vagas'
     | '/admin'
     | '/favoritos'
+    | '/mensagens'
     | '/painel'
     | '/medicos/$id'
     | '/medicos/'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/vagas'
     | '/admin'
     | '/favoritos'
+    | '/mensagens'
     | '/painel'
     | '/medicos/$id'
     | '/medicos'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/vagas'
     | '/_authenticated/admin'
     | '/_authenticated/favoritos'
+    | '/_authenticated/mensagens'
     | '/_authenticated/painel'
     | '/medicos/$id'
     | '/medicos/'
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFavoritosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mensagens': {
+      id: '/_authenticated/mensagens'
+      path: '/mensagens'
+      fullPath: '/mensagens'
+      preLoaderRoute: typeof AuthenticatedMensagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
       path: '/painel'
@@ -270,12 +289,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedFavoritosRoute: typeof AuthenticatedFavoritosRoute
+  AuthenticatedMensagensRoute: typeof AuthenticatedMensagensRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedFavoritosRoute: AuthenticatedFavoritosRoute,
+  AuthenticatedMensagensRoute: AuthenticatedMensagensRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
 }
 

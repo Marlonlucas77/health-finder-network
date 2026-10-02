@@ -1,9 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { MapPin, BadgeCheck, Clock, Phone, Building2, Mail, ShieldCheck } from "lucide-react";
+import {
+  MapPin,
+  BadgeCheck,
+  Clock,
+  Phone,
+  Building2,
+  Mail,
+  ShieldCheck,
+  MessageCircle,
+} from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Stars } from "@/components/stars";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,6 +52,7 @@ function DoctorDetail() {
   const { id } = Route.useParams();
   const { user, isEscalista } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [scores, setScores] = useState({
     rating: 5,
     punctuality: 5,
@@ -187,6 +197,16 @@ function DoctorDetail() {
                   <Badge className="mt-3" variant={data.doctor.available ? "default" : "outline"}>
                     {data.doctor.available ? "Disponível para plantões" : "Indisponível"}
                   </Badge>
+                  {user.id !== id && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-3 flex w-full items-center gap-2"
+                      onClick={() => navigate({ to: "/mensagens", search: { with: id } })}
+                    >
+                      <MessageCircle className="size-4" /> Enviar mensagem
+                    </Button>
+                  )}
                 </div>
               </div>
 
