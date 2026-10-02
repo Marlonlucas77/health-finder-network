@@ -329,7 +329,7 @@ function Painel() {
             <TabsTrigger value="perfil">Perfil</TabsTrigger>
             {isMedico && <TabsTrigger value="medico">Dados médicos</TabsTrigger>}
             {isEscalista && <TabsTrigger value="escalista">Escalista</TabsTrigger>}
-            <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>
+            {isMedico && <TabsTrigger value="candidaturas">Candidaturas</TabsTrigger>}
             {isEscalista && <TabsTrigger value="minhas-vagas">Minhas vagas</TabsTrigger>}
           </TabsList>
 
@@ -596,38 +596,42 @@ function Painel() {
             </TabsContent>
           )}
 
-          <TabsContent value="candidaturas" className="mt-6">
-            {(data?.apps ?? []).length === 0 ? (
-              <p className="text-muted-foreground">
-                Nenhuma candidatura ainda.{" "}
-                <Link to="/vagas" className="text-primary underline">
-                  Ver vagas abertas
-                </Link>
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {(data?.apps ?? []).map((a) => (
-                  <article
-                    key={a.id}
-                    className="card-surface flex items-center justify-between p-4"
-                  >
-                    <div>
-                      <p className="font-medium">{a.shifts?.specialties?.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {a.shifts?.hospitals?.name} ·{" "}
-                        {a.shifts?.shift_date
-                          ? new Date(`${a.shifts.shift_date}T00:00:00`).toLocaleDateString("pt-BR")
-                          : ""}
-                      </p>
-                    </div>
-                    <Badge variant="secondary" className="capitalize">
-                      {a.status}
-                    </Badge>
-                  </article>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          {isMedico && (
+            <TabsContent value="candidaturas" className="mt-6">
+              {(data?.apps ?? []).length === 0 ? (
+                <p className="text-muted-foreground">
+                  Nenhuma candidatura ainda.{" "}
+                  <Link to="/vagas" className="text-primary underline">
+                    Ver vagas abertas
+                  </Link>
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {(data?.apps ?? []).map((a) => (
+                    <article
+                      key={a.id}
+                      className="card-surface flex items-center justify-between p-4"
+                    >
+                      <div>
+                        <p className="font-medium">{a.shifts?.specialties?.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {a.shifts?.hospitals?.name} ·{" "}
+                          {a.shifts?.shift_date
+                            ? new Date(`${a.shifts.shift_date}T00:00:00`).toLocaleDateString(
+                                "pt-BR",
+                              )
+                            : ""}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="capitalize">
+                        {a.status}
+                      </Badge>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          )}
 
           {isEscalista && (
             <TabsContent value="minhas-vagas" className="mt-6 space-y-4">

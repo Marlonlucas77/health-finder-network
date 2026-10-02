@@ -45,7 +45,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tab, setTab] = useState(mode);
-  const [role, setRole] = useState<"medico" | "escalista">("medico");
+  const [role, setRole] = useState<"medico" | "escalista" | null>(null);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
@@ -64,6 +64,10 @@ function AuthPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    if (!role) {
+      toast.error("Escolha se você é médico(a) ou escalista antes de criar a conta");
+      return;
+    }
     const parsed = signupSchema.safeParse(form);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Dados inválidos");
@@ -181,28 +185,49 @@ function AuthPage() {
             </TabsContent>
 
             <TabsContent value="signup" className="mt-6 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {(
-                  [
-                    { key: "medico", label: "Sou médico", icon: Stethoscope },
-                    { key: "escalista", label: "Sou escalista", icon: CalendarClock },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    onClick={() => setRole(opt.key)}
-                    className={cn(
-                      "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors",
-                      role === opt.key
-                        ? "border-primary bg-secondary"
-                        : "border-border hover:border-primary/50",
-                    )}
-                  >
-                    <opt.icon className="size-5 text-primary" />
-                    <span className="text-sm font-medium">{opt.label}</span>
-                  </button>
-                ))}
+              <div>
+                <p className="mb-2 text-sm font-medium">
+                  Você é médico(a) ou escalista? <span className="text-destructive">*</span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {(
+                    [
+                      {
+                        key: "medico",
+                        label: "Sou médico",
+                        text: "Vou criar um perfil com CRM e me candidatar a plantões.",
+                        icon: Stethoscope,
+                      },
+                      {
+                        key: "escalista",
+                        label: "Sou escalista",
+                        text: "Vou buscar médicos e publicar vagas de plantão.",
+                        icon: CalendarClock,
+                      },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      aria-pressed={role === opt.key}
+                      onClick={() => setRole(opt.key)}
+                      className={cn(
+                        "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors",
+                        role === opt.key
+                          ? "border-primary bg-secondary ring-2 ring-primary/40"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      <opt.icon className="size-5 text-primary" />
+                      <span className="text-sm font-medium">{opt.label}</span>
+                      <span className="text-xs text-muted-foreground">{opt.text}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Essa escolha define o que você vê e pode fazer na plataforma e não muda sozinha
+                  depois.
+                </p>
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
@@ -247,7 +272,7 @@ function AuthPage() {
                     <Input id="state" value={form.state} onChange={set("state")} maxLength={2} />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full" disabled={loading || !role}>
                   Criar conta
                 </Button>
               </form>
