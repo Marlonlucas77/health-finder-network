@@ -449,6 +449,13 @@ function ShiftsPage() {
                           {applied ? "Candidatura enviada" : "Candidatar-me"}
                         </Button>
                       )}
+                      {isEscalista && s.created_by === user.id && (
+                        <Button className="mt-4" variant="outline" asChild>
+                          <Link to="/painel" search={{ tab: "minhas-vagas" }}>
+                            <Users className="size-4" /> Ver candidatos
+                          </Link>
+                        </Button>
+                      )}
                     </article>
                   );
                 })}

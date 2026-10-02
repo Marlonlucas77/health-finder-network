@@ -27,7 +27,12 @@ import { fetchAllHospitalOptions } from "@/lib/fetch-all-hospitals";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
+const painelSearchSchema = z.object({
+  tab: z.enum(["perfil", "medico", "escalista", "candidaturas", "minhas-vagas"]).optional(),
+});
+
 export const Route = createFileRoute("/_authenticated/painel")({
+  validateSearch: painelSearchSchema,
   head: () => ({
     meta: [
       { title: "Meu painel | EscalaMed" },
@@ -60,6 +65,7 @@ const doctorSchema = z.object({
 
 function Painel() {
   const { user, roles, isMedico, isEscalista } = useAuth();
+  const { tab: initialTab } = Route.useSearch();
   const queryClient = useQueryClient();
   const uid = user!.id;
 
@@ -324,7 +330,7 @@ function Painel() {
 
         {roles.length === 0 && <RolePicker />}
 
-        <Tabs defaultValue="perfil" className="mt-8">
+        <Tabs defaultValue={initialTab ?? "perfil"} className="mt-8">
           <TabsList>
             <TabsTrigger value="perfil">Perfil</TabsTrigger>
             {isMedico && <TabsTrigger value="medico">Dados médicos</TabsTrigger>}
